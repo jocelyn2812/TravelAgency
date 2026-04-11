@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Dashboard — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px; min-height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e, #16213e, #0f3460);
+            position: fixed; top: 0; left: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+        }
+        .brand { padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #e94560, #c73652);
+            border-radius: 12px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 20px; color: white; margin-bottom: 10px;
+            animation: pulse 3s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(233,69,96,0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(233,69,96,0); }
+        }
+        .brand h4 { color: white; font-weight: 700;
+            margin: 0; font-size: 16px; }
+        .brand small { color: rgba(255,255,255,0.4); font-size: 11px; }
+        .section-title { color: rgba(255,255,255,0.25);
+            font-size: 10px; text-transform: uppercase;
+            letter-spacing: 2px; padding: 15px 20px 5px; }
+        .nav-link { color: rgba(255,255,255,0.65);
+            padding: 11px 20px; border-radius: 10px;
+            margin: 2px 10px; display: flex;
+            align-items: center; text-decoration: none;
+            transition: all 0.25s; font-size: 14px; }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(233,69,96,0.2);
+            color: #e94560; transform: translateX(4px); }
+        .nav-link i { width: 22px; margin-right: 10px; }
+        .nav-link.voyages-link i { animation: fly 2s infinite; }
+        @keyframes fly {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(3px) rotate(-10deg); }
+            75% { transform: translateX(3px) rotate(10deg); }
+        }
+
+        /* MAIN */
+        .main { margin-left: 260px; min-height: 100vh; }
+
+        /* TOPBAR */
+        .topbar { background: white; padding: 15px 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between;
+            align-items: center; position: sticky;
+            top: 0; z-index: 50; }
+        .topbar-title { font-weight: 700; color: #1a1a2e;
+            font-size: 18px; }
+        .user-badge { background: #f8f9fa; border-radius: 25px;
+            padding: 8px 16px; display: flex;
+            align-items: center; gap: 8px; font-size: 14px; }
+        .user-avatar { width: 32px; height: 32px;
+            background: linear-gradient(135deg, #e94560, #c73652);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            color: white; font-size: 13px; }
+
+        /* WELCOME BANNER */
+        .welcome-banner {
+            background: linear-gradient(135deg,
+                #1a1a2e 0%, #0f3460 50%, #e94560 100%);
+            border-radius: 20px; padding: 30px;
+            color: white; margin-bottom: 25px;
+            position: relative; overflow: hidden;
+        }
+        .welcome-banner::before {
+            content: '✈'; position: absolute;
+            right: 30px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 120px; opacity: 0.08;
+            animation: planeFly 4s infinite ease-in-out;
+        }
+        @keyframes planeFly {
+            0%, 100% { transform: translateY(-50%) translateX(0) rotate(-5deg); }
+            50% { transform: translateY(-50%) translateX(15px) rotate(5deg); }
+        }
+        .welcome-banner h3 { font-weight: 700; margin-bottom: 5px; }
+        .welcome-banner p { opacity: 0.7; margin: 0; font-size: 14px; }
+        .ca-badge {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px; padding: 12px 20px;
+            display: inline-flex; align-items: center;
+            gap: 10px; margin-top: 15px;
+        }
+        .ca-badge .ca-num {
+            font-size: 22px; font-weight: 800; color: #ffd200;
+        }
+        .ca-badge .ca-lbl { font-size: 12px; opacity: 0.7; }
+
+        /* STAT CARDS */
+        .stat-card {
+            border-radius: 18px; padding: 25px;
+            color: white; border: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative; overflow: hidden;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        .stat-card::after {
+            content: ''; position: absolute;
+            right: -20px; bottom: -20px;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .blue { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .red { background: linear-gradient(135deg, #f5576c, #e94560); }
+        .green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .orange { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .stat-icon { font-size: 40px; opacity: 0.25;
+            position: absolute; right: 20px; top: 20px; }
+        .stat-number { font-size: 42px; font-weight: 800;
+            line-height: 1; margin-bottom: 5px; }
+        .stat-label { font-size: 14px; opacity: 0.85; }
+        .stat-sub { font-size: 12px; opacity: 0.65; margin-top: 8px; }
+
+        /* CONTENT CARDS */
+        .content-card {
+            background: white; border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .card-title { font-weight: 700; font-size: 15px;
+            color: #1a1a2e; margin-bottom: 20px;
+            display: flex; align-items: center;
+            gap: 8px; padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5; }
+
+        /* STATUT RESERVATIONS */
+        .statut-bar {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+        .statut-item {
+            flex: 1; padding: 12px;
+            border-radius: 10px; text-align: center;
+        }
+        .statut-item.attente {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.2);
+        }
+        .statut-item.confirmee {
+            background: rgba(40,167,69,0.1);
+            border: 1px solid rgba(40,167,69,0.2);
+        }
+        .statut-item.annulee {
+            background: rgba(220,53,69,0.1);
+            border: 1px solid rgba(220,53,69,0.2);
+        }
+        .statut-item.terminee {
+            background: rgba(108,117,125,0.1);
+            border: 1px solid rgba(108,117,125,0.2);
+        }
+        .statut-num { font-size: 24px; font-weight: 800; }
+        .statut-lbl { font-size: 11px; }
+        .attente .statut-num { color: #ffc107; }
+        .confirmee .statut-num { color: #28a745; }
+        .annulee .statut-num { color: #dc3545; }
+        .terminee .statut-num { color: #6c757d; }
+
+        /* TABLE */
+        .mini-table { font-size: 13px; }
+        .mini-table thead th {
+            background: #f8f9fa; font-weight: 600;
+            color: #495057; border: none;
+            padding: 10px 12px;
+        }
+        .mini-table tbody td { padding: 10px 12px;
+            vertical-align: middle; }
+        .mini-table tbody tr:hover { background: #f8f9fa; }
+
+        /* CLIENT AVATAR MINI */
+        .avatar-mini {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #e94560, #c73652);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 12px;
+        }
+
+        /* ACTION BUTTONS */
+        .action-btn {
+            display: flex; align-items: center;
+            gap: 12px; padding: 12px 15px;
+            border-radius: 12px; text-decoration: none;
+            transition: all 0.2s; margin-bottom: 8px;
+            border: 2px solid transparent;
+        }
+        .action-btn:last-child { margin-bottom: 0; }
+        .action-btn .btn-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .action-btn .btn-text { font-weight: 600;
+            font-size: 13px; }
+        .action-btn .btn-sub { font-size: 11px; opacity: 0.6; }
+        .action-btn.red-btn { background: rgba(233,69,96,0.05);
+            border-color: rgba(233,69,96,0.1); color: #e94560; }
+        .action-btn.red-btn .btn-icon { background: rgba(233,69,96,0.1); }
+        .action-btn.red-btn:hover { background: #e94560;
+            color: white; border-color: #e94560; }
+        .action-btn.red-btn:hover .btn-icon { background: rgba(255,255,255,0.2); }
+        .action-btn.blue-btn { background: rgba(102,126,234,0.05);
+            border-color: rgba(102,126,234,0.1); color: #667eea; }
+        .action-btn.blue-btn .btn-icon { background: rgba(102,126,234,0.1); }
+        .action-btn.blue-btn:hover { background: #667eea;
+            color: white; border-color: #667eea; }
+        .action-btn.blue-btn:hover .btn-icon { background: rgba(255,255,255,0.2); }
+        .action-btn.green-btn { background: rgba(17,153,142,0.05);
+            border-color: rgba(17,153,142,0.1); color: #11998e; }
+        .action-btn.green-btn .btn-icon { background: rgba(17,153,142,0.1); }
+        .action-btn.green-btn:hover { background: #11998e;
+            color: white; border-color: #11998e; }
+        .action-btn.green-btn:hover .btn-icon { background: rgba(255,255,255,0.2); }
+        .action-btn.orange-btn { background: rgba(247,151,30,0.05);
+            border-color: rgba(247,151,30,0.1); color: #f7971e; }
+        .action-btn.orange-btn .btn-icon { background: rgba(247,151,30,0.1); }
+        .action-btn.orange-btn:hover { background: #f7971e;
+            color: white; border-color: #f7971e; }
+        .action-btn.orange-btn:hover .btn-icon { background: rgba(255,255,255,0.2); }
+
+        /* VOYAGE MINI CARD */
+        .voyage-mini {
+            display: flex; align-items: center;
+            gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .voyage-mini:last-child { border-bottom: none; }
+        .voyage-mini-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            border-radius: 10px; display: flex;
+            align-items: center; justify-content: center;
+            color: #e94560; font-size: 16px;
+            flex-shrink: 0;
+        }
+        .voyage-mini-title { font-weight: 600;
+            font-size: 13px; color: #1a1a2e; }
+        .voyage-mini-sub { font-size: 11px; color: #6c757d; }
+        .voyage-mini-prix { font-weight: 700;
+            color: #e94560; font-size: 13px;
+            margin-left: auto; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">
+            <i class="fas fa-globe-africa"></i>
+        </div>
+        <h4>Travel Agency</h4>
+        <small>Gestion d'agence de voyages</small>
+    </div>
+    <nav class="mt-2">
+        <div class="section-title">Principal</div>
+        <a th:href="@{/dashboard}" class="nav-link active">
+            <i class="fas fa-tachometer-alt"></i>
+            Tableau de bord
+        </a>
+        <div class="section-title">Gestion</div>
+        <a th:href="@{/clients}" class="nav-link">
+            <i class="fas fa-users"></i> Clients
+        </a>
+        <a th:href="@{/voyages}" class="nav-link voyages-link">
+            <i class="fas fa-paper-plane"></i> Voyages
+        </a>
+        <a th:href="@{/destinations}" class="nav-link">
+            <i class="fas fa-map-marker-alt"></i> Destinations
+        </a>
+        <a th:href="@{/reservations}" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Réservations
+        </a>
+        <div class="section-title">Finance</div>
+        <a th:href="@{/paiements}" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Paiements
+        </a>
+    </nav>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-title">
+            <i class="fas fa-tachometer-alt me-2 text-danger"></i>
+            Tableau de bord
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="user-badge">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span sec:authentication="name">Admin</span>
+            </div>
+            <a th:href="@{/logout}"
+               class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Déconnexion
+            </a>
+        </div>
+    </div>
+
+    <div class="p-4">
+
+        <!-- WELCOME BANNER -->
+        <div class="welcome-banner">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3>
+                        Bonjour,
+                        <span sec:authentication="name">
+                            Admin
+                        </span> 👋
+                    </h3>
+                    <p>
+                        Bienvenue sur votre tableau de bord
+                        — Travel Agency
+                    </p>
+                    <div class="ca-badge">
+                        <div>
+                            <div class="ca-num"
+                                 th:text="${chiffreAffaires}+' Ar'">
+                                0 Ar
+                            </div>
+                            <div class="ca-lbl">
+                                Chiffre d'affaires total
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card blue">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number"
+                         th:text="${totalClients}">0
+                    </div>
+                    <div class="stat-label">Clients</div>
+                    <div class="stat-sub">
+                        <i class="fas fa-user me-1"></i>
+                        Total enregistrés
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card red">
+                    <div class="stat-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div class="stat-number"
+                         th:text="${totalVoyages}">0
+                    </div>
+                    <div class="stat-label">Voyages</div>
+                    <div class="stat-sub">
+                        <i class="fas fa-globe me-1"></i>
+                        Voyages disponibles
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card green">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-number"
+                         th:text="${totalReservations}">0
+                    </div>
+                    <div class="stat-label">Réservations</div>
+                    <div class="stat-sub">
+                        <i class="fas fa-ticket-alt me-1"></i>
+                        Total réservations
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card orange">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-number"
+                         th:text="${totalPaiements}">0
+                    </div>
+                    <div class="stat-label">Paiements</div>
+                    <div class="stat-sub">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Total transactions
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUTS RESERVATIONS -->
+        <div class="content-card mb-4">
+            <div class="card-title">
+                <i class="fas fa-chart-pie text-danger"></i>
+                Statut des réservations
+            </div>
+            <div class="statut-bar">
+                <div class="statut-item attente">
+                    <div class="statut-num"
+                         th:text="${reservationsEnAttente}">0
+                    </div>
+                    <div class="statut-lbl">⏳ En attente</div>
+                </div>
+                <div class="statut-item confirmee">
+                    <div class="statut-num"
+                         th:text="${reservationsConfirmees}">0
+                    </div>
+                    <div class="statut-lbl">✅ Confirmées</div>
+                </div>
+                <div class="statut-item terminee">
+                    <div class="statut-num"
+                         th:text="${reservationsTerminees}">0
+                    </div>
+                    <div class="statut-lbl">🏁 Terminées</div>
+                </div>
+                <div class="statut-item annulee">
+                    <div class="statut-num"
+                         th:text="${reservationsAnnulees}">0
+                    </div>
+                    <div class="statut-lbl">❌ Annulées</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+
+            <!-- DERNIÈRES RÉSERVATIONS -->
+            <div class="col-md-8">
+                <div class="content-card">
+                    <div class="card-title">
+                        <i class="fas fa-clock text-warning"></i>
+                        Dernières réservations
+                        <a th:href="@{/reservations}"
+                           class="ms-auto btn btn-sm btn-outline-danger"
+                           style="font-size:11px">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mini-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Voyage</th>
+                                    <th>Montant</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="r : ${dernieresReservations}">
+                                    <td class="fw-bold"
+                                        th:text="'#'+${r.id}">
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-mini">
+                                                <span th:text="${#strings.substring(r.client?.nom?:'?',0,1)}">
+                                                </span>
+                                            </div>
+                                            <span th:text="${r.client?.nom+' '+r.client?.prenom}">
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${r.voyage?.titre}"></td>
+                                    <td class="fw-bold text-danger"
+                                        th:text="${r.montantTotal}+' Ar'">
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="
+                                              ${r.statut?.name()=='CONFIRMEE'} ? 'bg-success' :
+                                              (${r.statut?.name()=='ANNULEE'} ? 'bg-danger' :
+                                              (${r.statut?.name()=='TERMINEE'} ? 'bg-secondary' :
+                                              'bg-warning text-dark'))"
+                                              th:text="${r.statut}">
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(dernieresReservations)}">
+                                    <td colspan="5"
+                                        class="text-center text-muted py-3">
+                                        Aucune réservation
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIONS RAPIDES -->
+            <div class="col-md-4">
+                <div class="content-card">
+                    <div class="card-title">
+                        <i class="fas fa-bolt text-warning"></i>
+                        Actions rapides
+                    </div>
+                    <a th:href="@{/clients/nouveau}"
+                       class="action-btn red-btn">
+                        <div class="btn-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <div class="btn-text">
+                                Nouveau client
+                            </div>
+                            <div class="btn-sub">
+                                Ajouter un client
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right ms-auto"></i>
+                    </a>
+                    <a th:href="@{/voyages/nouveau}"
+                       class="action-btn blue-btn">
+                        <div class="btn-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div>
+                            <div class="btn-text">
+                                Nouveau voyage
+                            </div>
+                            <div class="btn-sub">
+                                Créer un voyage
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right ms-auto"></i>
+                    </a>
+                    <a th:href="@{/reservations/nouveau}"
+                       class="action-btn green-btn">
+                        <div class="btn-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div>
+                            <div class="btn-text">
+                                Réservation
+                            </div>
+                            <div class="btn-sub">
+                                Nouvelle réservation
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right ms-auto"></i>
+                    </a>
+                    <a th:href="@{/paiements/nouveau}"
+                       class="action-btn orange-btn">
+                        <div class="btn-icon">
+                            <i class="fas fa-money-bill"></i>
+                        </div>
+                        <div>
+                            <div class="btn-text">
+                                Paiement
+                            </div>
+                            <div class="btn-sub">
+                                Enregistrer paiement
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right ms-auto"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- DERNIERS CLIENTS -->
+            <div class="col-md-6">
+                <div class="content-card">
+                    <div class="card-title">
+                        <i class="fas fa-users text-primary"></i>
+                        Derniers clients
+                        <a th:href="@{/clients}"
+                           class="ms-auto btn btn-sm btn-outline-primary"
+                           style="font-size:11px">
+                            Voir tout
+                        </a>
+                    </div>
+                    <table class="table mini-table">
+                        <tbody>
+                            <tr th:each="c : ${derniersClients}">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-mini">
+                                            <span th:text="${#strings.substring(c.nom,0,1)}">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold"
+                                                 th:text="${c.nom+' '+c.prenom}">
+                                            </div>
+                                            <small class="text-muted"
+                                                   th:text="${c.email}">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-warning text-dark"
+                                          th:text="${c.pointsFidelite}+' pts'">
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(derniersClients)}">
+                                <td class="text-center text-muted py-3">
+                                    Aucun client
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VOYAGES ACTIFS -->
+            <div class="col-md-6">
+                <div class="content-card">
+                    <div class="card-title">
+                        <i class="fas fa-paper-plane text-danger"></i>
+                        Voyages actifs
+                        <a th:href="@{/voyages}"
+                           class="ms-auto btn btn-sm btn-outline-danger"
+                           style="font-size:11px">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div th:each="v : ${voyagesActifs}"
+                         class="voyage-mini">
+                        <div class="voyage-mini-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div>
+                            <div class="voyage-mini-title"
+                                 th:text="${v.titre}">
+                            </div>
+                            <div class="voyage-mini-sub">
+                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                <span th:text="${v.destination?.ville}">
+                                </span>
+                                —
+                                <span th:text="${v.placesDisponibles}+' places'">
+                                </span>
+                            </div>
+                        </div>
+                        <div class="voyage-mini-prix"
+                             th:text="${v.prixAdulte}+' Ar'">
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(voyagesActifs)}"
+                         class="text-center text-muted py-3">
+                        Aucun voyage actif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

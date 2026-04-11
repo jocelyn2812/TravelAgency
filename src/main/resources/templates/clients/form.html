@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Formulaire Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; }
+        .sidebar {
+            width: 260px; min-height: 100vh;
+            background: linear-gradient(180deg,
+                #1a1a2e, #16213e, #0f3460);
+            position: fixed; top: 0; left: 0;
+        }
+        .brand {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .brand h4 { color: #e94560; font-weight: 700; margin: 0; }
+        .brand small { color: rgba(255,255,255,0.5); }
+        .section-title {
+            color: rgba(255,255,255,0.3); font-size: 11px;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 15px 20px 5px;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.7); padding: 12px 20px;
+            border-radius: 8px; margin: 2px 10px;
+            display: block; text-decoration: none;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(233,69,96,0.2); color: #e94560;
+        }
+        .nav-link i { width: 22px; margin-right: 8px; }
+        .main { margin-left: 260px; }
+        .topbar {
+            background: white; padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+        .box {
+            background: white; border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        .section-header {
+            background: #f8f9fa; border-radius: 8px;
+            padding: 10px 15px; margin-bottom: 20px;
+            border-left: 4px solid #e94560;
+            font-weight: 600;
+        }
+        .form-control:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+        }
+        .btn-red {
+            background: #e94560; border-color: #e94560;
+            color: white;
+        }
+        .btn-red:hover { background: #c73652; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="brand">
+        <h4><i class="fas fa-plane me-2"></i>Travel Agency</h4>
+        <small>Gestion d'agence de voyages</small>
+    </div>
+    <nav class="mt-2">
+        <div class="section-title">Principal</div>
+        <a th:href="@{/dashboard}" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            Tableau de bord
+        </a>
+        <div class="section-title">Gestion</div>
+        <a th:href="@{/clients}" class="nav-link active">
+            <i class="fas fa-users"></i> Clients
+        </a>
+        <a th:href="@{/voyages}" class="nav-link">
+            <i class="fas fa-plane-departure"></i> Voyages
+        </a>
+        <a th:href="@{/reservations}" class="nav-link">
+            <i class="fas fa-calendar-check"></i>
+            Réservations
+        </a>
+
+        <div class="section-title">Finance</div>
+        <a th:href="@{/paiements}" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Paiements
+        </a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h5 class="fw-bold m-0">
+            <i class="fas fa-user-plus me-2 text-danger"></i>
+            <span th:text="${client.id != null} ?
+                'Modifier' : 'Nouveau client'"></span>
+        </h5>
+        <a th:href="@{/logout}"
+           class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-1"></i>
+            Déconnexion
+        </a>
+    </div>
+
+    <div class="p-4">
+        <div class="box">
+            <form th:action="@{/clients/sauvegarder}"
+                  th:object="${client}" method="post">
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="section-header">
+                    <i class="fas fa-user me-2 text-danger"></i>
+                    Informations personnelles
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-500">Nom *</label>
+                        <input type="text" th:field="*{nom}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('nom')} ? ' is-invalid'"
+                               placeholder="Nom"/>
+                        <div class="invalid-feedback"
+                             th:errors="*{nom}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Prénom *</label>
+                        <input type="text" th:field="*{prenom}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('prenom')} ? ' is-invalid'"
+                               placeholder="Prénom"/>
+                        <div class="invalid-feedback"
+                             th:errors="*{prenom}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" th:field="*{email}"
+                               class="form-control"
+                               placeholder="email@example.com"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Téléphone</label>
+                        <input type="text" th:field="*{telephone}"
+                               class="form-control"
+                               placeholder="+261 34 00 000 00"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Date de naissance
+                        </label>
+                        <input type="date"
+                               th:field="*{dateNaissance}"
+                               class="form-control"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nationalité</label>
+                        <input type="text"
+                               th:field="*{nationalite}"
+                               class="form-control"
+                               placeholder="Ex: Malagasy"/>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+                    Adresse
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="form-label">Adresse</label>
+                        <input type="text" th:field="*{adresse}"
+                               class="form-control"
+                               placeholder="Rue, numéro..."/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ville</label>
+                        <input type="text" th:field="*{ville}"
+                               class="form-control"
+                               placeholder="Ex: Antananarivo"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Pays</label>
+                        <input type="text" th:field="*{pays}"
+                               class="form-control"
+                               placeholder="Ex: Madagascar"/>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fas fa-passport me-2 text-danger"></i>
+                    Passeport
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Numéro passeport
+                        </label>
+                        <input type="text"
+                               th:field="*{numeroPasseport}"
+                               class="form-control"
+                               placeholder="Ex: AB123456"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Date d'expiration
+                        </label>
+                        <input type="date"
+                               th:field="*{expirationPasseport}"
+                               class="form-control"/>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fas fa-star me-2 text-danger"></i>
+                    Préférences
+                </div>
+                <div class="mb-4">
+                    <textarea th:field="*{preferences}"
+                              class="form-control" rows="3"
+                              placeholder="Préférences de voyage...">
+                    </textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-red px-4">
+                        <i class="fas fa-save me-2"></i>
+                        Sauvegarder
+                    </button>
+                    <a th:href="@{/clients}"
+                       class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Retour
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

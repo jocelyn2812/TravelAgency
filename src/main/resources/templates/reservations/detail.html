@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Détail Réservation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; }
+        .sidebar { width: 260px; min-height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e, #16213e, #0f3460);
+            position: fixed; top: 0; left: 0; }
+        .brand { padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand h4 { color: #e94560; font-weight: 700; margin: 0; }
+        .brand small { color: rgba(255,255,255,0.5); }
+        .section-title { color: rgba(255,255,255,0.3);
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 1px; padding: 15px 20px 5px; }
+        .nav-link { color: rgba(255,255,255,0.7);
+            padding: 12px 20px; border-radius: 8px;
+            margin: 2px 10px; display: block;
+            text-decoration: none; transition: all 0.2s; }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(233,69,96,0.2); color: #e94560; }
+        .nav-link i { width: 22px; margin-right: 8px; }
+        .nav-link.voyages-link i { animation: fly 2s infinite; }
+        @keyframes fly {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(3px) rotate(-10deg); }
+            75% { transform: translateX(3px) rotate(10deg); }
+        }
+        .main { margin-left: 260px; }
+        .topbar { background: white; padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex; justify-content: space-between;
+            align-items: center; }
+        .box { background: white; border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
+        .info-label { color: #6c757d; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { font-weight: 600; color: #1a1a2e;
+            font-size: 15px; }
+        .progress { height: 10px; border-radius: 5px; }
+        .btn-red { background: #e94560;
+            border-color: #e94560; color: white; }
+        .btn-red:hover { background: #c73652; color: white; }
+        .section-header { background: #f8f9fa;
+            border-radius: 8px; padding: 10px 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e94560;
+            font-weight: 600; font-size: 14px; }
+        .paiement-item { border-left: 3px solid #28a745;
+            padding: 12px 15px; background: #f8fff8;
+            border-radius: 0 8px 8px 0; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="brand">
+        <h4><i class="fas fa-globe-africa me-2"></i>Travel Agency</h4>
+        <small>Gestion d'agence de voyages</small>
+    </div>
+    <nav class="mt-2">
+        <div class="section-title">Principal</div>
+        <a th:href="@{/dashboard}" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i> Tableau de bord
+        </a>
+        <div class="section-title">Gestion</div>
+        <a th:href="@{/clients}" class="nav-link">
+            <i class="fas fa-users"></i> Clients
+        </a>
+        <a th:href="@{/voyages}" class="nav-link voyages-link">
+            <i class="fas fa-paper-plane"></i> Voyages
+        </a>
+        <a th:href="@{/destinations}" class="nav-link">
+            <i class="fas fa-map-marker-alt"></i> Destinations
+        </a>
+        <a th:href="@{/reservations}" class="nav-link active">
+            <i class="fas fa-calendar-check"></i> Réservations
+        </a>
+        <div class="section-title">Finance</div>
+        <a th:href="@{/paiements}" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Paiements
+        </a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h5 class="fw-bold m-0">
+            <i class="fas fa-calendar-check me-2 text-danger"></i>
+            Détail de la réservation
+            <span th:text="'#'+${reservation?.id}"
+                  class="text-muted fs-6 ms-2"></span>
+        </h5>
+        <a th:href="@{/logout}"
+           class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-1"></i>
+            Déconnexion
+        </a>
+    </div>
+
+    <div class="p-4" th:if="${reservation}">
+
+        <!-- HEADER RESERVATION -->
+        <div class="box mb-4">
+            <div class="d-flex justify-content-between
+                        align-items-start">
+                <div>
+                    <h4 class="fw-bold mb-1"
+                        th:text="'Réservation #'+${reservation.id}">
+                    </h4>
+                    <p class="text-muted mb-2"
+                       th:text="'Créée le '+${reservation.dateReservation}">
+                    </p>
+                    <span class="badge fs-6"
+                          th:classappend="
+                          ${reservation.statut?.name()=='CONFIRMEE'} ? 'bg-success' :
+                          (${reservation.statut?.name()=='ANNULEE'} ? 'bg-danger' :
+                          (${reservation.statut?.name()=='TERMINEE'} ? 'bg-secondary' :
+                          'bg-warning text-dark'))"
+                          th:text="${reservation.statut}">
+                    </span>
+                </div>
+
+                <!-- BOUTONS D'ACTION SELON STATUT -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <a th:if="${reservation.statut?.name()=='EN_ATTENTE'}"
+                       th:href="@{/reservations/confirmer/{id}(id=${reservation.id})}"
+                       class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>
+                        Confirmer
+                    </a>
+                    <a th:if="${reservation.statut?.name()=='CONFIRMEE'}"
+                       th:href="@{/reservations/terminer/{id}(id=${reservation.id})}"
+                       class="btn btn-primary">
+                        <i class="fas fa-flag-checkered me-1"></i>
+                        Terminer le voyage
+                    </a>
+                    <a th:if="${reservation.statut?.name()!='ANNULEE'
+                               and reservation.statut?.name()!='TERMINEE'}"
+                       th:href="@{/reservations/annuler/{id}(id=${reservation.id})}"
+                       class="btn btn-warning"
+                       onclick="return confirm('Annuler cette réservation ?')">
+                        <i class="fas fa-times me-1"></i>
+                        Annuler
+                    </a>
+                    <a th:href="@{/paiements/nouveau?reservationId={id}(id=${reservation.id})}"
+                       class="btn btn-red"
+                       th:if="${reservation.statut?.name()!='ANNULEE'
+                               and reservation.statut?.name()!='TERMINEE'}">
+                        <i class="fas fa-money-bill me-1"></i>
+                        Ajouter paiement
+                    </a>
+                    <a th:href="@{/reservations}"
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Retour
+                    </a>
+                    <a th:href="@{/reservations/billet/{id}(id=${reservation.id})}"
+                       target="_blank"
+                       class="btn btn-outline-dark">
+                        <i class="fas fa-file-pdf me-1 text-danger"></i>
+                        Voir billet PDF
+                    </a>
+
+                    <!-- TÉLÉCHARGER BILLET -->
+                    <a th:href="@{/reservations/billet/download/{id}(id=${reservation.id})}"
+                       class="btn btn-dark">
+                        <i class="fas fa-download me-1"></i>
+                        Télécharger billet
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+
+            <!-- INFOS CLIENT -->
+            <div class="col-md-4">
+                <div class="box h-100">
+                    <div class="section-header">
+                        <i class="fas fa-user me-2 text-danger"></i>
+                        Client
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Nom complet</div>
+                        <div class="info-value"
+                             th:text="${reservation.client?.nom
+                             +' '+reservation.client?.prenom}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Email</div>
+                        <div class="info-value"
+                             th:text="${reservation.client?.email}?:'-'">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Téléphone</div>
+                        <div class="info-value"
+                             th:text="${reservation.client?.telephone}?:'-'">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-label">Points fidélité</div>
+                        <div class="info-value">
+                            <span class="badge bg-warning text-dark"
+                                  th:text="${reservation.client?.pointsFidelite}+' pts'">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFOS VOYAGE -->
+            <div class="col-md-4">
+                <div class="box h-100">
+                    <div class="section-header">
+                        <i class="fas fa-paper-plane me-2 text-danger"></i>
+                        Voyage
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Titre</div>
+                        <div class="info-value"
+                             th:text="${reservation.voyage?.titre}?:'-'">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Destination</div>
+                        <div class="info-value"
+                             th:text="${reservation.voyage?.destination?.ville
+                             +', '+reservation.voyage?.destination?.pays}?:'-'">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Dates</div>
+                        <div class="info-value">
+                            <span th:text="${reservation.voyage?.dateDepart}">
+                            </span>
+                            <i class="fas fa-arrow-right mx-1 text-muted"></i>
+                            <span th:text="${reservation.voyage?.dateRetour}">
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-label">Participants</div>
+                        <div class="info-value">
+                            <span th:text="${reservation.nombreAdultes}+' adulte(s)'">
+                            </span>
+                            <span th:if="${reservation.nombreEnfants > 0}"
+                                  th:text="' + '+${reservation.nombreEnfants}+' enfant(s)'">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFOS FINANCIÈRES -->
+            <div class="col-md-4">
+                <div class="box h-100">
+                    <div class="section-header">
+                        <i class="fas fa-money-bill me-2 text-danger"></i>
+                        Finances
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Montant total</div>
+                        <div class="info-value text-danger fs-4"
+                             th:text="${reservation.montantTotal}+' Ar'">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Montant payé</div>
+                        <div class="info-value text-success"
+                             th:text="${reservation.acompteVerse}+' Ar'">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Reste à payer</div>
+                        <div class="info-value text-warning fw-bold"
+                             th:text="${(reservation.montantTotal != null
+                             and reservation.acompteVerse != null)
+                             ? reservation.montantTotal - reservation.acompteVerse
+                             : reservation.montantTotal}+' Ar'">
+                        </div>
+                    </div>
+                    <!-- BARRE DE PAIEMENT -->
+                    <div class="info-label mb-2">Progression du paiement</div>
+                    <div class="progress mb-1">
+                        <div class="progress-bar bg-success"
+                             th:style="'width:'+
+                             (${reservation.montantTotal != null
+                             and reservation.montantTotal > 0
+                             and reservation.acompteVerse != null}
+                             ? ${reservation.acompteVerse.doubleValue()
+                                / reservation.montantTotal.doubleValue() * 100}
+                             : 0)+'%'">
+                        </div>
+                    </div>
+                    <small class="text-muted"
+                           th:text="(${reservation.montantTotal != null
+                           and reservation.montantTotal > 0
+                           and reservation.acompteVerse != null}
+                           ? ${#numbers.formatDecimal(
+                              reservation.acompteVerse.doubleValue()
+                              / reservation.montantTotal.doubleValue() * 100,
+                              1, 1)}
+                           : '0')+' % payé'">
+                    </small>
+                </div>
+            </div>
+
+            <!-- OBSERVATIONS -->
+            <div class="col-12" th:if="${reservation.observations}">
+                <div class="box">
+                    <div class="section-header">
+                        <i class="fas fa-comment me-2 text-danger"></i>
+                        Observations
+                    </div>
+                    <p class="mb-0" th:text="${reservation.observations}"></p>
+                </div>
+            </div>
+
+            <!-- LISTE DES PAIEMENTS -->
+            <div class="col-12">
+                <div class="box">
+                    <div class="d-flex justify-content-between
+                                align-items-center mb-3">
+                        <div class="section-header mb-0 flex-grow-1">
+                            <i class="fas fa-receipt me-2 text-danger"></i>
+                            Historique des paiements
+                        </div>
+                        <a th:href="@{/paiements/nouveau?reservationId={id}(id=${reservation.id})}"
+                           class="btn btn-red btn-sm ms-3"
+                           th:if="${reservation.statut?.name()!='ANNULEE'
+                                   and reservation.statut?.name()!='TERMINEE'}">
+                            <i class="fas fa-plus me-1"></i>
+                            Ajouter
+                        </a>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(reservation.paiements)}"
+                         class="text-center text-muted py-4">
+                        <i class="fas fa-receipt fa-3x mb-2 d-block opacity-25"></i>
+                        Aucun paiement enregistré
+                    </div>
+
+                    <div th:each="p : ${reservation.paiements}"
+                         class="paiement-item">
+                        <div class="d-flex justify-content-between
+                                    align-items-center">
+                            <div>
+                                <span class="fw-bold text-success fs-5"
+                                      th:text="${p.montant}+' Ar'">
+                                </span>
+                                <span class="badge bg-info ms-2"
+                                      th:text="${p.mode}">
+                                </span>
+                                <span class="badge bg-secondary ms-1"
+                                      th:text="${p.type}">
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted small"
+                                     th:text="${p.datePaiement}">
+                                </div>
+                                <div class="text-muted small"
+                                     th:text="'Réf: '+${p.reference}?:'-'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

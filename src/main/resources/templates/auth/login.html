@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Connexion — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh;
+            display: flex; overflow: hidden;
+        }
+
+        /* PARTIE GAUCHE — Image/Animation */
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px; position: relative; overflow: hidden;
+        }
+
+        /* Cercles décoratifs animés */
+        .circle {
+            position: absolute; border-radius: 50%;
+            border: 1px solid rgba(233,69,96,0.15);
+            animation: rotate 20s linear infinite;
+        }
+        .circle-1 { width: 300px; height: 300px; top: -50px; left: -50px; }
+        .circle-2 { width: 500px; height: 500px; top: -100px; left: -100px;
+            animation-direction: reverse; animation-duration: 30s; }
+        .circle-3 { width: 200px; height: 200px; bottom: 50px; right: -50px; }
+        .circle-4 { width: 400px; height: 400px; bottom: -100px; right: -100px;
+            animation-direction: reverse; }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        /* Avions flottants */
+        .floating-plane {
+            position: absolute; font-size: 24px;
+            opacity: 0.15; animation: floatPlane 6s ease-in-out infinite;
+        }
+        .fp1 { top: 20%; left: 15%; animation-delay: 0s; }
+        .fp2 { top: 60%; left: 70%; animation-delay: 2s; font-size: 16px; }
+        .fp3 { top: 80%; left: 20%; animation-delay: 4s; font-size: 20px; }
+        .fp4 { top: 30%; left: 75%; animation-delay: 1s; font-size: 18px; }
+        @keyframes floatPlane {
+            0%, 100% { transform: translateY(0) rotate(-10deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .left-content { text-align: center; position: relative; z-index: 2; }
+        .main-plane {
+            font-size: 80px; margin-bottom: 20px;
+            display: block;
+            animation: mainPlane 3s ease-in-out infinite;
+        }
+        @keyframes mainPlane {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        .left-content h2 {
+            color: white; font-weight: 800;
+            font-size: 32px; margin-bottom: 10px;
+        }
+        .left-content h2 span { color: #e94560; }
+        .left-content p {
+            color: rgba(255,255,255,0.5);
+            font-size: 15px; max-width: 280px; margin: 0 auto 30px;
+        }
+
+        /* Stats déco */
+        .deco-stats {
+            display: flex; gap: 20px;
+            justify-content: center;
+        }
+        .deco-stat {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 15px 20px;
+            text-align: center; color: white;
+        }
+        .deco-stat .num {
+            font-size: 24px; font-weight: 800;
+            color: #e94560;
+        }
+        .deco-stat .lbl {
+            font-size: 11px; opacity: 0.5;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* PARTIE DROITE — Formulaire */
+        .right-panel {
+            width: 480px; background: #f8f9fa;
+            display: flex; align-items: center;
+            justify-content: center; padding: 40px;
+        }
+        .login-box { width: 100%; }
+        .login-header { margin-bottom: 35px; }
+        .login-header h3 {
+            font-weight: 800; color: #1a1a2e;
+            font-size: 28px; margin-bottom: 5px;
+        }
+        .login-header p { color: #6c757d; font-size: 14px; margin: 0; }
+
+        /* Logo petit */
+        .mini-logo {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #e94560, #c73652);
+            border-radius: 14px;
+            display: flex; align-items: center;
+            justify-content: center; color: white;
+            font-size: 22px; margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(233,69,96,0.3);
+        }
+
+        /* Inputs */
+        .input-group-custom { margin-bottom: 18px; }
+        .input-label {
+            font-size: 13px; font-weight: 600;
+            color: #495057; margin-bottom: 8px;
+            display: block;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-icon {
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd; font-size: 14px; z-index: 2;
+        }
+        .form-input {
+            width: 100%; padding: 14px 15px 14px 42px;
+            border: 2px solid #e9ecef; border-radius: 12px;
+            font-size: 14px; background: white;
+            transition: all 0.2s; outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        .form-input:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 4px rgba(233,69,96,0.08);
+        }
+
+        /* Bouton */
+        .btn-login {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #e94560, #c73652);
+            border: none; border-radius: 12px;
+            color: white; font-size: 15px;
+            font-weight: 700; cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 8px 20px rgba(233,69,96,0.3);
+            margin-top: 8px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(233,69,96,0.4);
+        }
+        .btn-login:active { transform: translateY(0); }
+
+        /* Alertes */
+        .alert-custom {
+            padding: 12px 15px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .alert-error {
+            background: rgba(220,53,69,0.1);
+            border: 1px solid rgba(220,53,69,0.2);
+            color: #dc3545;
+        }
+        .alert-success {
+            background: rgba(40,167,69,0.1);
+            border: 1px solid rgba(40,167,69,0.2);
+            color: #28a745;
+        }
+
+        /* Credentials hint */
+        .credentials-hint {
+            background: rgba(102,126,234,0.08);
+            border: 1px solid rgba(102,126,234,0.15);
+            border-radius: 10px; padding: 12px 15px;
+            margin-top: 20px; font-size: 12px;
+            color: #667eea;
+        }
+        .credentials-hint strong { display: block; margin-bottom: 4px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .left-panel { display: none; }
+            .right-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PARTIE GAUCHE -->
+    <div class="left-panel">
+        <!-- Cercles décoratifs -->
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <div class="circle circle-4"></div>
+
+        <!-- Avions flottants -->
+        <div class="floating-plane fp1">✈</div>
+        <div class="floating-plane fp2">🛩</div>
+        <div class="floating-plane fp3">✈</div>
+        <div class="floating-plane fp4">🛫</div>
+
+        <div class="left-content">
+            <span class="main-plane">✈️</span>
+            <h2>Travel <span>Agency</span></h2>
+            <p>
+                Votre plateforme complète de gestion
+                d'agence de voyages
+            </p>
+
+            <div class="deco-stats">
+                <div class="deco-stat">
+                    <div class="num">∞</div>
+                    <div class="lbl">Destinations</div>
+                </div>
+                <div class="deco-stat">
+                    <div class="num">24/7</div>
+                    <div class="lbl">Disponible</div>
+                </div>
+                <div class="deco-stat">
+                    <div class="num">100%</div>
+                    <div class="lbl">Sécurisé</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PARTIE DROITE -->
+    <div class="right-panel">
+        <div class="login-box">
+
+            <div class="mini-logo">
+                <i class="fas fa-globe-africa"></i>
+            </div>
+
+            <div class="login-header">
+                <h3>Connexion</h3>
+                <p>Entrez vos identifiants pour accéder au tableau de bord</p>
+            </div>
+
+            <!-- Erreur -->
+            <div th:if="${param.error}"
+                 class="alert-custom alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                Identifiant ou mot de passe incorrect.
+            </div>
+
+            <!-- Succès déconnexion -->
+            <div th:if="${param.logout}"
+                 class="alert-custom alert-success">
+                <i class="fas fa-check-circle"></i>
+                Déconnexion réussie.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+
+                <div class="input-group-custom">
+                    <label class="input-label">
+                        Identifiant
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" name="username"
+                               class="form-input"
+                               placeholder="Votre identifiant"
+                               required autofocus/>
+                    </div>
+                </div>
+
+                <div class="input-group-custom">
+                    <label class="input-label">
+                        Mot de passe
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password"
+                               class="form-input"
+                               placeholder="Votre mot de passe"
+                               required/>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
