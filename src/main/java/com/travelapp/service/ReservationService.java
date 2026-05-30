@@ -82,7 +82,8 @@ public class ReservationService {
 
         return reservationRepository.save(reservation);
     }
-
+    
+    
     @Transactional
     public void annuler(Long id) {
         reservationRepository.findById(id).ifPresent(r -> {
@@ -141,10 +142,11 @@ public class ReservationService {
         return reservationRepository.count();
     }
 
-    public long countByStatut(StatutReservation statut) {
-        return reservationRepository
-            .findByStatut(statut).size();
-    }
+    public long countByStatut(
+        StatutReservation statut) {
+    return reservationRepository
+        .findByStatut(statut).size();
+}
 
     public List<Reservation> findByClient(Long clientId) {
         return reservationRepository

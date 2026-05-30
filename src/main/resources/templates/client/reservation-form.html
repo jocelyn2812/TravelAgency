@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width,
+          initial-scale=1.0"/>
+    <title>Réserver — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; }
+        .navbar-client {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .navbar-brand {
+            color: white; font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+        .navbar-brand span { color: #e94560; }
+        .nav-link-client {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none; font-size: 14px;
+            padding: 6px 15px; border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .nav-link-client:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        .box {
+            background: white; border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .voyage-recap {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            border-radius: 20px; padding: 25px;
+            color: white; margin-bottom: 25px;
+        }
+        .voyage-recap .titre {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .recap-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid
+                rgba(255,255,255,0.1);
+            font-size: 14px;
+        }
+        .recap-row:last-child {
+            border-bottom: none;
+        }
+        .recap-row .lbl { opacity: 0.6; }
+        .recap-row .val { font-weight: 600; }
+        .counter-box {
+            display: flex; align-items: center;
+            gap: 15px;
+        }
+        .counter-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 2px solid #e94560;
+            background: white; color: #e94560;
+            font-size: 20px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .counter-btn:hover {
+            background: #e94560; color: white;
+        }
+        .counter-btn:disabled {
+            opacity: 0.4; cursor: not-allowed;
+        }
+        .counter-val {
+            font-size: 24px; font-weight: 800;
+            color: #1a1a2e; min-width: 35px;
+            text-align: center;
+        }
+        .montant-card {
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border-radius: 15px; padding: 20px;
+            color: white; text-align: center;
+        }
+        .montant-card .lbl {
+            font-size: 12px; opacity: 0.8;
+        }
+        .montant-card .num {
+            font-size: 32px; font-weight: 800;
+        }
+        .montant-card .formule {
+            font-size: 12px; opacity: 0.7;
+            margin-top: 5px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px; padding: 6px;
+        }
+        .places-info {
+            border-radius: 10px; padding: 10px 15px;
+            font-size: 13px; margin-top: 10px;
+        }
+        .places-ok {
+            background: rgba(40,167,69,0.1);
+            border: 1px solid rgba(40,167,69,0.2);
+            color: #28a745;
+        }
+        .places-warn {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.2);
+            color: #856404;
+        }
+        .places-full {
+            background: rgba(220,53,69,0.1);
+            border: 1px solid rgba(220,53,69,0.2);
+            color: #dc3545;
+        }
+        .btn-reserver {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border: none; border-radius: 12px;
+            color: white; font-size: 16px;
+            font-weight: 700; cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-reserver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px
+                rgba(233,69,96,0.3);
+        }
+        .btn-reserver:disabled {
+            opacity: 0.5; cursor: not-allowed;
+            transform: none;
+        }
+        .alert-custom {
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+        }
+        .alert-error {
+            background: rgba(220,53,69,0.08);
+            border: 1px solid rgba(220,53,69,0.2);
+            color: #dc3545;
+        }
+        .alert-success {
+            background: rgba(40,167,69,0.08);
+            border: 1px solid rgba(40,167,69,0.2);
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar-client"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <a href="/client/accueil"
+       class="navbar-brand">
+        ✈ Travel<span>Agency</span>
+    </a>
+    <div style="display:flex;gap:8px;
+         align-items:center">
+
+        <a href="/client/voyages"
+           class="nav-btn nav-btn-outline">
+            <i class="fas fa-compass me-1"></i>
+            Voyages
+        </a>
+
+        <span sec:authorize="isAuthenticated()">
+            <a href="/client/mes-reservations"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-calendar-check me-1"></i>
+                Mes réservations
+            </a>
+            <a href="/client/profil"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-user me-1"></i>
+                Mon profil
+            </a>
+            <a href="/client/logout"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Déconnexion
+            </a>
+        </span>
+
+        <span sec:authorize="!isAuthenticated()">
+            <a href="/client/connexion"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-sign-in-alt me-1"></i>
+                Connexion
+            </a>
+            <a href="/client/inscription"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-user-plus me-1"></i>
+                S'inscrire
+            </a>
+        </span>
+    </div>
+</nav>
+<div class="container py-4"
+     th:if="${voyage}">
+
+    <!-- Messages -->
+    <div th:if="${error}"
+         class="alert-custom alert-error mb-3">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- FORMULAIRE -->
+        <div class="col-md-7">
+            <div class="box">
+                <h5 class="fw-bold mb-4">
+                    <i class="fas fa-calendar-plus me-2 text-danger"></i>
+                    Nouvelle réservation
+                </h5>
+
+                <form th:action="@{/client/reserver/{id}(id=${voyage.id})}"
+                      method="post"
+                      id="formReservation">
+
+                    <!-- PARTICIPANTS -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold mb-3">
+                            Nombre d'adultes *
+                            <small class="text-muted fw-normal">
+                                (min. 1)
+                            </small>
+                        </label>
+                        <div class="counter-box">
+                            <button type="button"
+                                    class="counter-btn"
+                                    id="btnMoinsA"
+                                    onclick="changerAdultes(-1)">
+                                −
+                            </button>
+                            <span class="counter-val"
+                                  id="affAdultes">1</span>
+                            <button type="button"
+                                    class="counter-btn"
+                                    onclick="changerAdultes(1)">
+                                +
+                            </button>
+                            <input type="hidden"
+                                   name="nombreAdultes"
+                                   id="nbAdultes"
+                                   value="1"/>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold mb-3">
+                            Nombre d'enfants
+                            <small class="text-muted fw-normal">
+                                (moins de 12 ans)
+                            </small>
+                        </label>
+                        <div class="counter-box">
+                            <button type="button"
+                                    class="counter-btn"
+                                    id="btnMoinsE"
+                                    onclick="changerEnfants(-1)">
+                                −
+                            </button>
+                            <span class="counter-val"
+                                  id="affEnfants">0</span>
+                            <button type="button"
+                                    class="counter-btn"
+                                    onclick="changerEnfants(1)">
+                                +
+                            </button>
+                            <input type="hidden"
+                                   name="nombreEnfants"
+                                   id="nbEnfants"
+                                   value="0"/>
+                        </div>
+                    </div>
+
+                    <!-- PLACES DISPONIBLES -->
+                    <div class="places-info"
+                         id="placesInfo">
+                    </div>
+
+                    <!-- OBSERVATIONS -->
+                    <div class="mb-4 mt-3">
+                        <label class="form-label fw-semibold">
+                            Demandes spéciales
+                            <small class="text-muted fw-normal">
+                                (optionnel)
+                            </small>
+                        </label>
+                        <textarea name="observations"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="500"
+                                  id="observations"
+                                  placeholder="Allergies, préférences, besoins spéciaux...">
+                        </textarea>
+                        <small class="text-muted"
+                               id="obsCount">
+                            0/500 caractères
+                        </small>
+                    </div>
+
+                    <button type="submit"
+                            class="btn-reserver"
+                            id="btnSubmit">
+                        <i class="fas fa-check me-2"></i>
+                        Confirmer la réservation
+                    </button>
+
+                    <p class="text-muted text-center mt-2"
+                       style="font-size:12px">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Votre réservation sera confirmée
+                        par notre équipe sous 24h
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- RÉCAPITULATIF VOYAGE -->
+        <div class="col-md-5">
+
+            <div class="voyage-recap">
+                <div class="titre"
+                     th:text="${voyage.titre}">
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">📍 Destination</span>
+                    <span class="val"
+                          th:text="${voyage.destination?.ville+', '+voyage.destination?.pays}">
+                    </span>
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">🛫 Départ</span>
+                    <span class="val"
+                          th:text="${voyage.dateDepart}">
+                    </span>
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">🛬 Retour</span>
+                    <span class="val"
+                          th:text="${voyage.dateRetour}">
+                    </span>
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">💰 Prix adulte</span>
+                    <span class="val"
+                          th:text="${voyage.prixAdulte}+' Ar'">
+                    </span>
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">💰 Prix enfant</span>
+                    <span class="val"
+                          th:text="${voyage.prixEnfant}+' Ar'">
+                    </span>
+                </div>
+                <div class="recap-row">
+                    <span class="lbl">💺 Places dispo.</span>
+                    <span class="val"
+                          th:text="${voyage.placesDisponibles}+' places'">
+                    </span>
+                </div>
+            </div>
+
+            <!-- MONTANT AUTO -->
+            <div class="montant-card">
+                <div class="lbl">MONTANT TOTAL</div>
+                <div class="num" id="montantTotal">
+                    0 Ar
+                </div>
+                <div class="formule"
+                     id="formule">
+                    Sélectionnez les participants
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const prixAdulte =
+        /*[[${voyage.prixAdulte}]]*/ 0;
+    const prixEnfant =
+        /*[[${voyage.prixEnfant}]]*/ 0;
+    const placesMax =
+        /*[[${voyage.placesDisponibles}]]*/ 0;
+
+    let nbAdultes = 1;
+    let nbEnfants = 0;
+
+    function changerAdultes(delta) {
+        const nouveau = nbAdultes + delta;
+        if (nouveau < 1) return;
+        if (nouveau + nbEnfants > placesMax) {
+            afficherPlacesAlerte();
+            return;
+        }
+        nbAdultes = nouveau;
+        document.getElementById('affAdultes')
+            .textContent = nbAdultes;
+        document.getElementById('nbAdultes')
+            .value = nbAdultes;
+        document.getElementById('btnMoinsA')
+            .disabled = nbAdultes <= 1;
+        calculer();
+    }
+
+    function changerEnfants(delta) {
+        const nouveau = nbEnfants + delta;
+        if (nouveau < 0) return;
+        if (nbAdultes + nouveau > placesMax) {
+            afficherPlacesAlerte();
+            return;
+        }
+        nbEnfants = nouveau;
+        document.getElementById('affEnfants')
+            .textContent = nbEnfants;
+        document.getElementById('nbEnfants')
+            .value = nbEnfants;
+        document.getElementById('btnMoinsE')
+            .disabled = nbEnfants <= 0;
+        calculer();
+    }
+
+    function calculer() {
+        const total = (nbAdultes * prixAdulte)
+            + (nbEnfants * prixEnfant);
+
+        document.getElementById('montantTotal')
+            .textContent =
+            total.toLocaleString() + ' Ar';
+
+        document.getElementById('formule')
+            .textContent =
+            '(' + nbAdultes + ' × '
+            + Number(prixAdulte).toLocaleString()
+            + ') + (' + nbEnfants + ' × '
+            + Number(prixEnfant).toLocaleString()
+            + ') = '
+            + total.toLocaleString() + ' Ar';
+
+        // Places info
+        const total_participants =
+            nbAdultes + nbEnfants;
+        const reste = placesMax
+            - total_participants;
+        const info = document.getElementById(
+            'placesInfo');
+        const btn = document.getElementById(
+            'btnSubmit');
+
+        if (reste < 0) {
+            info.className =
+                'places-info places-full';
+            info.innerHTML =
+                '<i class="fas fa-times-circle me-1"></i>'
+                + 'Places insuffisantes ! '
+                + placesMax + ' place(s) disponible(s).';
+            btn.disabled = true;
+        } else if (reste <= 3) {
+            info.className =
+                'places-info places-warn';
+            info.innerHTML =
+                '<i class="fas fa-exclamation-triangle me-1"></i>'
+                + 'Attention : seulement '
+                + reste + ' place(s) restante(s) !';
+            btn.disabled = false;
+        } else {
+            info.className =
+                'places-info places-ok';
+            info.innerHTML =
+                '<i class="fas fa-check-circle me-1"></i>'
+                + reste + ' place(s) disponible(s) '
+                + 'après votre réservation.';
+            btn.disabled = false;
+        }
+    }
+
+    function afficherPlacesAlerte() {
+        const info = document.getElementById(
+            'placesInfo');
+        info.className = 'places-info places-full';
+        info.innerHTML =
+            '<i class="fas fa-times-circle me-1"></i>'
+            + 'Maximum '
+            + placesMax
+            + ' participant(s) pour ce voyage.';
+    }
+
+    // Compteur observations
+    document.getElementById('observations')
+        .addEventListener('input', function() {
+            document.getElementById('obsCount')
+                .textContent =
+                this.value.length + '/500 caractères';
+        });
+
+    // Init
+    document.getElementById('btnMoinsA')
+        .disabled = true;
+    document.getElementById('btnMoinsE')
+        .disabled = true;
+    calculer();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

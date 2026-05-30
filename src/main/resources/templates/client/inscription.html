@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width,
+          initial-scale=1.0"/>
+    <title>Inscription — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            min-height: 100vh;
+            padding: 30px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-box {
+            background: white;
+            border-radius: 25px;
+            width: 100%; max-width: 550px;
+            padding: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .auth-logo .icon {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border-radius: 18px;
+            display: flex; align-items: center;
+            justify-content: center;
+            font-size: 26px; color: white;
+            margin: 0 auto 10px;
+            box-shadow: 0 8px 20px
+                rgba(233,69,96,0.3);
+        }
+        .auth-logo h4 {
+            font-weight: 800; color: #1a1a2e;
+            margin: 0;
+        }
+        .section-header {
+            background: #f8f9fa;
+            border-left: 4px solid #e94560;
+            border-radius: 0 8px 8px 0;
+            padding: 8px 15px;
+            font-weight: 700; font-size: 13px;
+            margin: 20px 0 12px;
+            color: #1a1a2e;
+        }
+        .form-label {
+            font-size: 12px; font-weight: 600;
+            color: #495057; margin-bottom: 5px;
+        }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute; left: 12px;
+            top: 50%; transform: translateY(-50%);
+            color: #adb5bd; font-size: 13px;
+            z-index: 2;
+        }
+        .form-control {
+            padding: 10px 12px 10px 36px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px; font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px
+                rgba(233,69,96,0.1);
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        .form-control.is-valid {
+            border-color: #28a745;
+        }
+        .invalid-feedback {
+            font-size: 11px; display: block;
+        }
+        /* Indicateur force mdp */
+        .pwd-strength {
+            height: 4px; border-radius: 2px;
+            margin-top: 5px;
+            transition: all 0.3s;
+        }
+        .pwd-strength.faible { background: #dc3545; width: 33%; }
+        .pwd-strength.moyen { background: #ffc107; width: 66%; }
+        .pwd-strength.fort { background: #28a745; width: 100%; }
+        .pwd-hint {
+            font-size: 11px; color: #6c757d;
+            margin-top: 3px;
+        }
+        .btn-auth {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border: none; border-radius: 12px;
+            color: white; font-size: 15px;
+            font-weight: 700; cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 15px; transition: all 0.2s;
+        }
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px
+                rgba(233,69,96,0.3);
+        }
+        .btn-auth:disabled {
+            opacity: 0.6; cursor: not-allowed;
+            transform: none;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px; color: #6c757d;
+        }
+        .auth-footer a {
+            color: #e94560; font-weight: 600;
+            text-decoration: none;
+        }
+        .alert-custom {
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 13px; margin-bottom: 15px;
+            display: flex; gap: 8px;
+            align-items: center;
+        }
+        .alert-error {
+            background: rgba(220,53,69,0.08);
+            border: 1px solid rgba(220,53,69,0.2);
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-box">
+    <div class="auth-logo">
+        <div class="icon">✈</div>
+        <h4>Créer un compte</h4>
+    </div>
+
+    <!-- Erreur globale -->
+    <div th:if="${error}"
+         class="alert-custom alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/client/inscription}"
+          th:object="${client}"
+          method="post"
+          id="formInscription"
+          novalidate>
+
+        <!-- INFOS PERSONNELLES -->
+        <div class="section-header">
+            <i class="fas fa-user me-2 text-danger"></i>
+            Informations personnelles
+        </div>
+
+        <div class="row g-3">
+            <div class="col-6">
+                <label class="form-label">
+                    Nom *
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text"
+                           th:field="*{nom}"
+                           id="nom"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('nom')} ? ' is-invalid'"
+                           placeholder="Votre nom"
+                           autocomplete="family-name"/>
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('nom')}"
+                     th:errors="*{nom}">
+                </div>
+                <div class="invalid-feedback"
+                     id="nomError"></div>
+            </div>
+
+            <div class="col-6">
+                <label class="form-label">
+                    Prénom *
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text"
+                           th:field="*{prenom}"
+                           id="prenom"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('prenom')} ? ' is-invalid'"
+                           placeholder="Votre prénom"
+                           autocomplete="given-name"/>
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('prenom')}"
+                     th:errors="*{prenom}">
+                </div>
+                <div class="invalid-feedback"
+                     id="prenomError"></div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">
+                    Email *
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email"
+                           th:field="*{email}"
+                           id="email"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'"
+                           placeholder="votre@email.com"
+                           autocomplete="email"/>
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('email')}"
+                     th:errors="*{email}">
+                </div>
+                <div class="invalid-feedback"
+                     id="emailError"></div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">
+                    Téléphone
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel"
+                           th:field="*{telephone}"
+                           id="telephone"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('telephone')} ? ' is-invalid'"
+                           placeholder="+261 34 00 000 00"
+                           autocomplete="tel"/>
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('telephone')}"
+                     th:errors="*{telephone}">
+                </div>
+                <div class="invalid-feedback"
+                     id="telError"></div>
+            </div>
+        </div>
+
+        <!-- MOT DE PASSE -->
+        <div class="section-header">
+            <i class="fas fa-lock me-2 text-danger"></i>
+            Sécurité
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label">
+                    Mot de passe *
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password"
+                           th:field="*{password}"
+                           id="password"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('password')} ? ' is-invalid'"
+                           placeholder="Min 8 car., 1 majuscule, 1 chiffre"/>
+                </div>
+                <div class="pwd-strength"
+                     id="pwdStrength"></div>
+                <div class="pwd-hint"
+                     id="pwdHint">
+                    8+ caractères, 1 majuscule,
+                    1 chiffre minimum
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('password')}"
+                     th:errors="*{password}">
+                </div>
+                <div class="invalid-feedback"
+                     id="pwdError"></div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">
+                    Confirmer le mot de passe *
+                </label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password"
+                           name="confirmPassword"
+                           id="confirmPassword"
+                           class="form-control"
+                           placeholder="Répétez le mot de passe"/>
+                </div>
+                <div class="invalid-feedback"
+                     id="confirmError"></div>
+            </div>
+        </div>
+
+        <button type="submit"
+                class="btn-auth"
+                id="btnSubmit">
+            <i class="fas fa-user-plus me-2"></i>
+            Créer mon compte
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        Déjà un compte ?
+        <a href="/client/connexion">
+            Se connecter
+        </a>
+    </div>
+</div>
+
+<script>
+// ===== VALIDATIONS EN TEMPS RÉEL =====
+
+const regexLettre =
+    /^[a-zA-ZÀ-ÿ\s\-']{2,50}$/;
+const regexEmail =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const regexTel =
+    /^[+]?[0-9\s]{8,15}$/;
+
+// Bloquer les chiffres dans nom/prénom
+document.getElementById('nom')
+    .addEventListener('keypress', function(e) {
+        if (/[0-9]/.test(e.key)) {
+            e.preventDefault();
+            afficherErreur('nomError',
+                'Les chiffres ne sont pas autorisés');
+        } else {
+            cacherErreur('nomError');
+        }
+    });
+
+document.getElementById('prenom')
+    .addEventListener('keypress', function(e) {
+        if (/[0-9]/.test(e.key)) {
+            e.preventDefault();
+            afficherErreur('prenomError',
+                'Les chiffres ne sont pas autorisés');
+        } else {
+            cacherErreur('prenomError');
+        }
+    });
+
+// Bloquer les lettres dans téléphone
+document.getElementById('telephone')
+    .addEventListener('keypress', function(e) {
+        const allowed = /[0-9+\s]/;
+        if (!allowed.test(e.key)) {
+            e.preventDefault();
+            afficherErreur('telError',
+                'Seuls les chiffres sont autorisés');
+        } else {
+            cacherErreur('telError');
+        }
+    });
+
+// Validation nom
+document.getElementById('nom')
+    .addEventListener('blur', function() {
+        const val = this.value.trim();
+        if (val && !regexLettre.test(val)) {
+            setInvalid(this, 'nomError',
+                'Lettres uniquement (2-50 caractères)');
+        } else if (val) {
+            setValid(this, 'nomError');
+        }
+    });
+
+// Validation prénom
+document.getElementById('prenom')
+    .addEventListener('blur', function() {
+        const val = this.value.trim();
+        if (val && !regexLettre.test(val)) {
+            setInvalid(this, 'prenomError',
+                'Lettres uniquement (2-50 caractères)');
+        } else if (val) {
+            setValid(this, 'prenomError');
+        }
+    });
+
+// Validation email
+document.getElementById('email')
+    .addEventListener('blur', function() {
+        const val = this.value.trim();
+        if (val && !regexEmail.test(val)) {
+            setInvalid(this, 'emailError',
+                'Format email invalide');
+        } else if (val) {
+            setValid(this, 'emailError');
+        }
+    });
+
+// Validation téléphone
+document.getElementById('telephone')
+    .addEventListener('blur', function() {
+        const val = this.value.trim();
+        if (val && !regexTel.test(val)) {
+            setInvalid(this, 'telError',
+                'Numéro invalide (8-15 chiffres)');
+        } else if (val) {
+            setValid(this, 'telError');
+        }
+    });
+
+// Force mot de passe
+document.getElementById('password')
+    .addEventListener('input', function() {
+        const pwd = this.value;
+        const bar = document.getElementById(
+            'pwdStrength');
+        const hint = document.getElementById(
+            'pwdHint');
+
+        const long = pwd.length >= 8;
+        const maj = /[A-Z]/.test(pwd);
+        const chiffre = /[0-9]/.test(pwd);
+        const score = [long, maj, chiffre]
+            .filter(Boolean).length;
+
+        bar.className = 'pwd-strength';
+        cacherErreur('pwdError');
+
+        if (pwd.length === 0) {
+            bar.style.width = '0';
+            hint.textContent =
+                '8+ caractères, 1 majuscule, '
+                + '1 chiffre minimum';
+            hint.style.color = '#6c757d';
+        } else if (score === 1) {
+            bar.classList.add('faible');
+            hint.textContent =
+                '⚠️ Mot de passe faible';
+            hint.style.color = '#dc3545';
+        } else if (score === 2) {
+            bar.classList.add('moyen');
+            hint.textContent =
+                '⚡ Mot de passe moyen';
+            hint.style.color = '#ffc107';
+        } else {
+            bar.classList.add('fort');
+            hint.textContent =
+                '✅ Mot de passe fort';
+            hint.style.color = '#28a745';
+        }
+    });
+
+// Confirmation mot de passe
+document.getElementById('confirmPassword')
+    .addEventListener('input', function() {
+        const pwd = document.getElementById(
+            'password').value;
+        if (this.value && this.value !== pwd) {
+            setInvalid(this, 'confirmError',
+                'Les mots de passe ne '
+                + 'correspondent pas');
+        } else if (this.value) {
+            setValid(this, 'confirmError');
+        }
+    });
+
+// Validation finale avant envoi
+document.getElementById('formInscription')
+    .addEventListener('submit', function(e) {
+
+        let valid = true;
+
+        // Nom
+        const nom = document.getElementById('nom');
+        if (!nom.value.trim()
+                || !regexLettre.test(
+                    nom.value.trim())) {
+            setInvalid(nom, 'nomError',
+                'Nom invalide (lettres, 2-50 car.)');
+            valid = false;
+        }
+
+        // Prénom
+        const prenom = document.getElementById(
+            'prenom');
+        if (!prenom.value.trim()
+                || !regexLettre.test(
+                    prenom.value.trim())) {
+            setInvalid(prenom, 'prenomError',
+                'Prénom invalide (lettres, 2-50 car.)');
+            valid = false;
+        }
+
+        // Email
+        const email = document.getElementById(
+            'email');
+        if (!email.value.trim()
+                || !regexEmail.test(
+                    email.value.trim())) {
+            setInvalid(email, 'emailError',
+                'Email invalide');
+            valid = false;
+        }
+
+        // Téléphone
+        const tel = document.getElementById(
+            'telephone');
+        if (tel.value.trim()
+                && !regexTel.test(
+                    tel.value.trim())) {
+            setInvalid(tel, 'telError',
+                'Téléphone invalide');
+            valid = false;
+        }
+
+        // Mot de passe
+        const pwd = document.getElementById(
+            'password');
+        const hasMaj = /[A-Z]/.test(pwd.value);
+        const hasNum = /[0-9]/.test(pwd.value);
+        if (!pwd.value
+                || pwd.value.length < 8
+                || !hasMaj || !hasNum) {
+            setInvalid(pwd, 'pwdError',
+                '8+ caractères, 1 majuscule, '
+                + '1 chiffre requis');
+            valid = false;
+        }
+
+        // Confirmation
+        const confirm = document.getElementById(
+            'confirmPassword');
+        if (confirm.value !== pwd.value) {
+            setInvalid(confirm, 'confirmError',
+                'Les mots de passe ne '
+                + 'correspondent pas');
+            valid = false;
+        }
+
+        if (!valid) e.preventDefault();
+    });
+
+// Fonctions utilitaires
+function setInvalid(input, errorId, msg) {
+    input.classList.add('is-invalid');
+    input.classList.remove('is-valid');
+    afficherErreur(errorId, msg);
+}
+
+function setValid(input, errorId) {
+    input.classList.remove('is-invalid');
+    input.classList.add('is-valid');
+    cacherErreur(errorId);
+}
+
+function afficherErreur(id, msg) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+}
+
+function cacherErreur(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = '';
+        el.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html>

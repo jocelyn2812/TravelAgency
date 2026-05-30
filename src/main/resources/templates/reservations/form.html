@@ -10,171 +10,484 @@
         * { font-family: 'Poppins', sans-serif; }
         body { background: #f0f2f5; margin: 0; }
         .sidebar { width: 260px; min-height: 100vh;
-            background: linear-gradient(180deg, #1a1a2e, #16213e, #0f3460);
+            background: linear-gradient(180deg,
+                #1a1a2e, #16213e, #0f3460);
             position: fixed; top: 0; left: 0; }
-        .brand { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .brand h4 { color: #e94560; font-weight: 700; margin: 0; }
-        .brand small { color: rgba(255,255,255,0.5); }
-        .section-title { color: rgba(255,255,255,0.3); font-size: 11px;
-            text-transform: uppercase; letter-spacing: 1px; padding: 15px 20px 5px; }
-        .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px;
-            border-radius: 8px; margin: 2px 10px; display: block; text-decoration: none; }
-        .nav-link:hover, .nav-link.active { background: rgba(233,69,96,0.2); color: #e94560; }
-        .nav-link i { width: 22px; margin-right: 8px; }
+        .brand { padding: 25px 20px;
+            border-bottom: 1px solid
+                rgba(255,255,255,0.1); }
+        .brand h4 { color: #e94560;
+            font-weight: 700; margin: 0; }
+        .brand small {
+            color: rgba(255,255,255,0.5); }
+        .section-title {
+            color: rgba(255,255,255,0.3);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 20px 5px; }
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 20px; border-radius: 8px;
+            margin: 2px 10px; display: block;
+            text-decoration: none; }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(233,69,96,0.2);
+            color: #e94560; }
+        .nav-link i { width: 22px;
+            margin-right: 8px; }
+        .nav-link.voyages-link i {
+            animation: fly 2s infinite; }
+        @keyframes fly {
+            0%, 100% { transform:
+                translateX(0) rotate(0deg); }
+            25% { transform:
+                translateX(3px) rotate(-10deg); }
+            75% { transform:
+                translateX(3px) rotate(10deg); }
+        }
         .main { margin-left: 260px; }
-        .topbar { background: white; padding: 15px 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: flex; justify-content: space-between; align-items: center; }
-        .box { background: white; border-radius: 15px; padding: 30px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
-        .section-header { background: #f8f9fa; border-radius: 8px;
-            padding: 10px 15px; margin-bottom: 20px;
-            border-left: 4px solid #e94560; font-weight: 600; }
-        .form-control:focus, .form-select:focus {
-            border-color: #e94560; box-shadow: 0 0 0 3px rgba(233,69,96,0.1); }
-        .btn-red { background: #e94560; border-color: #e94560; color: white; }
-        .btn-red:hover { background: #c73652; color: white; }
+        .topbar { background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px
+                rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center; }
+        .box { background: white;
+            border-radius: 15px; padding: 30px;
+            box-shadow: 0 2px 15px
+                rgba(0,0,0,0.05); }
+        .section-header {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e94560;
+            font-weight: 600; }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px
+                rgba(233,69,96,0.1); }
+        .btn-red { background: #e94560;
+            border-color: #e94560; color: white; }
+        .btn-red:hover { background: #c73652;
+            color: white; }
+        .montant-auto {
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border-radius: 12px; padding: 15px 20px;
+            color: white; text-align: center;
+            margin-top: 15px; }
+        .montant-auto .lbl {
+            font-size: 12px; opacity: 0.8; }
+        .montant-auto .num {
+            font-size: 28px; font-weight: 800; }
+        .counter-box {
+            display: flex; align-items: center;
+            gap: 12px; }
+        .counter-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2px solid #e94560;
+            background: white; color: #e94560;
+            font-size: 18px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center;
+            justify-content: center;
+            transition: all 0.2s; }
+        .counter-btn:hover {
+            background: #e94560; color: white; }
+        .counter-val {
+            font-size: 22px; font-weight: 800;
+            color: #1a1a2e; min-width: 30px;
+            text-align: center; }
     </style>
 </head>
 <body>
+
 <div class="sidebar">
     <div class="brand">
-        <h4><i class="fas fa-plane me-2"></i>Travel Agency</h4>
+        <h4><i class="fas fa-globe-africa me-2"></i>
+            Travel Agency</h4>
         <small>Gestion d'agence de voyages</small>
     </div>
     <nav class="mt-2">
         <div class="section-title">Principal</div>
         <a th:href="@{/dashboard}" class="nav-link">
-            <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            <i class="fas fa-tachometer-alt"></i>
+            Tableau de bord
         </a>
         <div class="section-title">Gestion</div>
         <a th:href="@{/clients}" class="nav-link">
             <i class="fas fa-users"></i> Clients
         </a>
-        <a th:href="@{/voyages}" class="nav-link">
-            <i class="fas fa-plane-departure"></i> Voyages
+        <a th:href="@{/voyages}"
+           class="nav-link voyages-link">
+            <i class="fas fa-paper-plane"></i>
+            Voyages
         </a>
-        <a th:href="@{/reservations}" class="nav-link active">
-            <i class="fas fa-calendar-check"></i> Réservations
+        <a th:href="@{/destinations}"
+           class="nav-link">
+            <i class="fas fa-map-marker-alt"></i>
+            Destinations
         </a>
-
+        <a th:href="@{/reservations}"
+           class="nav-link active">
+            <i class="fas fa-calendar-check"></i>
+            Réservations
+        </a>
         <div class="section-title">Finance</div>
-        <a th:href="@{/paiements}" class="nav-link">
-            <i class="fas fa-money-bill-wave"></i> Paiements
+        <a th:href="@{/paiements}"
+           class="nav-link">
+            <i class="fas fa-money-bill-wave"></i>
+            Paiements
         </a>
     </nav>
 </div>
+
 <div class="main">
     <div class="topbar">
         <h5 class="fw-bold m-0">
-            <i class="fas fa-calendar-plus me-2 text-danger"></i>
-            <span th:text="${reservation.id != null} ?
-                'Modifier la réservation' : 'Nouvelle réservation'">
+            <i class="fas fa-calendar-plus me-2
+                text-danger"></i>
+            <span th:text="${reservation.id != null}
+                ? 'Modifier la réservation'
+                : 'Nouvelle réservation'">
             </span>
         </h5>
-        <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger">
-            <i class="fas fa-sign-out-alt me-1"></i> Déconnexion
+        <a th:href="@{/logout}"
+           class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-1"></i>
+            Déconnexion
         </a>
     </div>
+
     <div class="p-4">
-        <div class="box">
-            <form th:action="@{/reservations/sauvegarder}"
-                  th:object="${reservation}" method="post">
-                <input type="hidden" th:field="*{id}"/>
+        <div class="row g-4">
 
-                <div class="section-header">
-                    <i class="fas fa-user me-2 text-danger"></i>
-                    Client et Voyage
-                </div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Client *</label>
-                        <select th:field="*{client.id}" class="form-select">
-                            <option value="">-- Choisir un client --</option>
-                            <option th:each="c : ${clients}"
+            <!-- FORMULAIRE -->
+            <div class="col-md-7">
+                <div class="box">
+                    <form
+                        th:action="@{/reservations/sauvegarder}"
+                        method="post"
+                        id="formRes">
+
+                        <!-- ID caché -->
+                        <input type="hidden"
+                               name="id"
+                               th:value="${reservation.id}"/>
+
+                        <!-- CLIENT -->
+                        <div class="section-header">
+                            <i class="fas fa-user me-2
+                                text-danger"></i>
+                            Client *
+                        </div>
+                        <div class="mb-4">
+                            <select name="client.id"
+                                    id="selClient"
+                                    class="form-select"
+                                    required>
+                                <option value="">
+                                    -- Choisir --
+                                </option>
+                                <option
+                                    th:each="c : ${clients}"
                                     th:value="${c.id}"
-                                    th:text="${c.nom+' '+c.prenom}">
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Voyage *</label>
-                        <select th:field="*{voyage.id}" class="form-select">
-                            <option value="">-- Choisir un voyage --</option>
-                            <option th:each="v : ${voyages}"
+                                    th:text="${c.nom+' '+c.prenom+' — '+c.email}"
+                                    th:selected="${reservation.client != null
+                                    and reservation.client.id == c.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- VOYAGE -->
+                        <div class="section-header">
+                            <i class="fas fa-paper-plane
+                                me-2 text-danger"></i>
+                            Voyage *
+                        </div>
+                        <div class="mb-4">
+                            <select name="voyage.id"
+                                    id="selVoyage"
+                                    class="form-select"
+                                    required
+                                    onchange="chargerVoyage(this.value)">
+                                <option value="">
+                                    -- Choisir --
+                                </option>
+                                <option
+                                    th:each="v : ${voyages}"
                                     th:value="${v.id}"
-                                    th:text="${v.titre}">
-                            </option>
-                        </select>
+                                    th:text="${v.titre+' — '+v.destination?.ville+' ('+v.placesDisponibles+' places)' }"
+                                    th:data-prix-adulte="${v.prixAdulte}"
+                                    th:data-prix-enfant="${v.prixEnfant}"
+                                    th:data-places="${v.placesDisponibles}"
+                                    th:selected="${reservation.voyage != null
+                                    and reservation.voyage.id == v.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- PARTICIPANTS -->
+                        <div class="section-header">
+                            <i class="fas fa-users me-2
+                                text-danger"></i>
+                            Participants
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label
+                                    fw-semibold">
+                                    Adultes
+                                </label>
+                                <div class="counter-box">
+                                    <button type="button"
+                                            class="counter-btn"
+                                            id="btnMA"
+                                            onclick="changer('a',-1)">
+                                        −
+                                    </button>
+                                    <span class="counter-val"
+                                          id="affA">1</span>
+                                    <button type="button"
+                                            class="counter-btn"
+                                            onclick="changer('a',1)">
+                                        +
+                                    </button>
+                                    <input type="hidden"
+                                           name="nombreAdultes"
+                                           id="nbA"
+                                           th:value="${reservation.nombreAdultes != null
+                                           ? reservation.nombreAdultes : 1}"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label
+                                    fw-semibold">
+                                    Enfants
+                                </label>
+                                <div class="counter-box">
+                                    <button type="button"
+                                            class="counter-btn"
+                                            id="btnME"
+                                            onclick="changer('e',-1)">
+                                        −
+                                    </button>
+                                    <span class="counter-val"
+                                          id="affE">0</span>
+                                    <button type="button"
+                                            class="counter-btn"
+                                            onclick="changer('e',1)">
+                                        +
+                                    </button>
+                                    <input type="hidden"
+                                           name="nombreEnfants"
+                                           id="nbE"
+                                           th:value="${reservation.nombreEnfants != null
+                                           ? reservation.nombreEnfants : 0}"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STATUT -->
+                        <div class="section-header">
+                            <i class="fas fa-info-circle
+                                me-2 text-danger"></i>
+                            Statut
+                        </div>
+                        <div class="mb-4">
+                            <select name="statut"
+                                    class="form-select">
+                                <option value="EN_ATTENTE"
+                                        th:selected="${reservation.statut == null
+                                        or reservation.statut.name() == 'EN_ATTENTE'}">
+                                    ⏳ En attente
+                                </option>
+                                <option value="CONFIRMEE"
+                                        th:selected="${reservation.statut?.name() == 'CONFIRMEE'}">
+                                    ✅ Confirmée
+                                </option>
+                                <option value="ANNULEE"
+                                        th:selected="${reservation.statut?.name() == 'ANNULEE'}">
+                                    ❌ Annulée
+                                </option>
+                                <option value="TERMINEE"
+                                        th:selected="${reservation.statut?.name() == 'TERMINEE'}">
+                                    🏁 Terminée
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- OBSERVATIONS -->
+                        <div class="section-header">
+                            <i class="fas fa-comment
+                                me-2 text-danger"></i>
+                            Observations
+                        </div>
+                        <div class="mb-4">
+                            <textarea name="observations"
+                                      class="form-control"
+                                      rows="3"
+                                      maxlength="500"
+                                      th:text="${reservation.observations}"
+                                      placeholder="Notes...">
+                            </textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit"
+                                    class="btn btn-red px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Sauvegarder
+                            </button>
+                            <a th:href="@{/reservations}"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Retour
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RÉCAP DROITE -->
+            <div class="col-md-5">
+                <div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);
+                     border-radius:15px; padding:20px;
+                     color:white">
+                    <div style="font-weight:700;
+                         color:#e94560; margin-bottom:15px">
+                        ✈ Voyage sélectionné
+                    </div>
+                    <div id="voyageInfo"
+                         style="font-size:13px;
+                         opacity:0.7;
+                         text-align:center;
+                         padding:20px 0">
+                        Sélectionnez un voyage
                     </div>
                 </div>
 
-                <div class="section-header">
-                    <i class="fas fa-users me-2 text-danger"></i>
-                    Participants
-                </div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label">Nombre d'adultes</label>
-                        <input type="number" th:field="*{nombreAdultes}"
-                               class="form-control" min="1" placeholder="1"/>
+                <div class="montant-auto">
+                    <div class="lbl">
+                        MONTANT TOTAL CALCULÉ
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Nombre d'enfants</label>
-                        <input type="number" th:field="*{nombreEnfants}"
-                               class="form-control" min="0" placeholder="0"/>
+                    <div class="num"
+                         id="montantTotal">
+                        0 Ar
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Statut</label>
-                        <select th:field="*{statut}" class="form-select">
-                            <option value="EN_ATTENTE">En attente</option>
-                            <option value="CONFIRMEE">Confirmée</option>
-                            <option value="ANNULEE">Annulée</option>
-                            <option value="TERMINEE">Terminée</option>
-                        </select>
+                    <div style="font-size:12px;
+                         opacity:0.7; margin-top:5px"
+                         id="formule">
+                        (Adultes × Prix) + (Enfants × Prix)
                     </div>
                 </div>
-
-                <div class="section-header">
-                    <i class="fas fa-money-bill me-2 text-danger"></i>
-                    Paiement
-                </div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Montant total (Ar)</label>
-                        <input type="number" th:field="*{montantTotal}"
-                               class="form-control" placeholder="Ex: 1000000"/>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Acompte versé (Ar)</label>
-                        <input type="number" th:field="*{acompteVerse}"
-                               class="form-control" placeholder="Ex: 300000"/>
-                    </div>
-                </div>
-
-                <div class="section-header">
-                    <i class="fas fa-comment me-2 text-danger"></i>
-                    Observations
-                </div>
-                <div class="mb-4">
-                    <textarea th:field="*{observations}"
-                              class="form-control" rows="3"
-                              placeholder="Notes ou observations..."></textarea>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-red px-4">
-                        <i class="fas fa-save me-2"></i> Sauvegarder
-                    </button>
-                    <a th:href="@{/reservations}"
-                       class="btn btn-outline-secondary px-4">
-                        <i class="fas fa-arrow-left me-2"></i> Retour
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+let prixA = 0, prixE = 0;
+let nbA = parseInt(
+    document.getElementById('nbA').value) || 1;
+let nbE = parseInt(
+    document.getElementById('nbE').value) || 0;
+
+// Init affichage
+document.getElementById('affA').textContent = nbA;
+document.getElementById('affE').textContent = nbE;
+document.getElementById('btnMA').disabled =
+    nbA <= 1;
+document.getElementById('btnME').disabled =
+    nbE <= 0;
+
+function changer(type, delta) {
+    if (type === 'a') {
+        nbA = Math.max(1, nbA + delta);
+        document.getElementById('affA')
+            .textContent = nbA;
+        document.getElementById('nbA').value = nbA;
+        document.getElementById('btnMA')
+            .disabled = nbA <= 1;
+    } else {
+        nbE = Math.max(0, nbE + delta);
+        document.getElementById('affE')
+            .textContent = nbE;
+        document.getElementById('nbE').value = nbE;
+        document.getElementById('btnME')
+            .disabled = nbE <= 0;
+    }
+    calculer();
+}
+
+function chargerVoyage(id) {
+    const sel = document.getElementById('selVoyage');
+    const opt = sel.options[sel.selectedIndex];
+    if (!id) {
+        document.getElementById('voyageInfo')
+            .innerHTML =
+            '<div style="opacity:0.5;'
+            + 'text-align:center;padding:20px">'
+            + 'Sélectionnez un voyage</div>';
+        prixA = 0; prixE = 0;
+        calculer(); return;
+    }
+    prixA = parseFloat(
+        opt.getAttribute('data-prix-adulte')) || 0;
+    prixE = parseFloat(
+        opt.getAttribute('data-prix-enfant')) || 0;
+    const places = parseInt(
+        opt.getAttribute('data-places')) || 0;
+    const titre = opt.text.split(' — ')[0];
+
+    document.getElementById('voyageInfo')
+        .innerHTML =
+        '<div style="font-weight:700;'
+        + 'font-size:15px;margin-bottom:10px">'
+        + titre + '</div>'
+        + '<div style="font-size:12px;'
+        + 'opacity:0.7">💰 Adulte : '
+        + prixA.toLocaleString() + ' Ar</div>'
+        + '<div style="font-size:12px;'
+        + 'opacity:0.7">💰 Enfant : '
+        + prixE.toLocaleString() + ' Ar</div>'
+        + '<div style="font-size:12px;'
+        + 'opacity:0.7;margin-top:5px">'
+        + '💺 Places : ' + places + '</div>';
+
+    calculer();
+}
+
+function calculer() {
+    const total = (nbA * prixA) + (nbE * prixE);
+    document.getElementById('montantTotal')
+        .textContent =
+        total.toLocaleString() + ' Ar';
+    document.getElementById('formule')
+        .textContent =
+        '(' + nbA + ' × '
+        + prixA.toLocaleString() + ') + ('
+        + nbE + ' × '
+        + prixE.toLocaleString() + ') = '
+        + total.toLocaleString() + ' Ar';
+}
+
+// Charger si modification
+window.onload = function() {
+    const sel =
+        document.getElementById('selVoyage');
+    if (sel && sel.value) {
+        chargerVoyage(sel.value);
+    }
+    calculer();
+};
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

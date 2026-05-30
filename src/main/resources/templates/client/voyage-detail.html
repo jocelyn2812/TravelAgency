@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width,
+          initial-scale=1.0"/>
+    <title>Détail Voyage — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; }
+        .navbar-client {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .navbar-brand {
+            color: white; font-size: 20px;
+            font-weight: 800; text-decoration: none;
+        }
+        .navbar-brand span { color: #e94560; }
+        .nav-btn {
+            padding: 8px 18px; border-radius: 25px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .nav-btn-outline {
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+        .nav-btn-outline:hover {
+            border-color: #e94560; color: #e94560;
+        }
+        .nav-btn-solid {
+            background: #e94560; color: white;
+            border: none;
+        }
+        .nav-btn-solid:hover {
+            background: #c73652; color: white;
+        }
+
+        /* HERO VOYAGE */
+        .voyage-hero {
+            background: linear-gradient(135deg,
+                #1a1a2e 0%, #0f3460 60%,
+                rgba(233,69,96,0.3) 100%);
+            padding: 60px 20px;
+            color: white; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .voyage-hero::before {
+            content: '🌍';
+            position: absolute; font-size: 200px;
+            opacity: 0.05; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .voyage-hero .badges {
+            margin-bottom: 15px;
+        }
+        .voyage-hero h1 {
+            font-size: 36px; font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .voyage-hero .dest {
+            font-size: 18px; opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        /* CONTENU */
+        .info-card {
+            background: white; border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .info-card h5 {
+            font-weight: 700; color: #1a1a2e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex; align-items: center;
+            gap: 8px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 14px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .lbl { color: #6c757d; }
+        .info-row .val { font-weight: 600; color: #1a1a2e; }
+
+        /* PRIX CARD */
+        .prix-card {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            border-radius: 20px; padding: 25px;
+            color: white; position: sticky; top: 80px;
+        }
+        .prix-card h5 {
+            font-weight: 700; margin-bottom: 20px;
+            color: #e94560;
+        }
+        .prix-item {
+            display: flex; justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 15px;
+        }
+        .prix-item:last-of-type { border-bottom: none; }
+        .prix-item .montant {
+            font-size: 22px; font-weight: 800;
+            color: #ffd200;
+        }
+        .btn-reserver-large {
+            width: 100%; padding: 16px;
+            background: linear-gradient(135deg,
+                #e94560, #c73652);
+            border: none; border-radius: 12px;
+            color: white; font-size: 16px;
+            font-weight: 700; cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s; margin-top: 15px;
+            text-decoration: none;
+            display: block; text-align: center;
+        }
+        .btn-reserver-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px
+                rgba(233,69,96,0.4);
+            color: white;
+        }
+        .places-warning {
+            background: rgba(255,193,7,0.2);
+            border-radius: 8px; padding: 10px;
+            font-size: 12px; margin-top: 10px;
+            color: #ffd200; text-align: center;
+        }
+        .btn-back {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none; font-size: 14px;
+            display: inline-flex; align-items: center;
+            gap: 5px; margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: #e94560; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar-client"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <a href="/client/accueil"
+       class="navbar-brand">
+        ✈ Travel<span>Agency</span>
+    </a>
+    <div style="display:flex;gap:8px;
+         align-items:center">
+
+        <a href="/client/voyages"
+           class="nav-btn nav-btn-outline">
+            <i class="fas fa-compass me-1"></i>
+            Voyages
+        </a>
+
+        <span sec:authorize="isAuthenticated()">
+            <a href="/client/mes-reservations"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-calendar-check me-1"></i>
+                Mes réservations
+            </a>
+            <a href="/client/profil"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-user me-1"></i>
+                Mon profil
+            </a>
+            <a href="/client/logout"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Déconnexion
+            </a>
+        </span>
+
+        <span sec:authorize="!isAuthenticated()">
+            <a href="/client/connexion"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-sign-in-alt me-1"></i>
+                Connexion
+            </a>
+            <a href="/client/inscription"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-user-plus me-1"></i>
+                S'inscrire
+            </a>
+        </span>
+    </div>
+</nav>
+<div th:if="${voyage}">
+
+    <!-- HERO -->
+    <div class="voyage-hero">
+        <div class="badges">
+            <span class="badge bg-danger me-2"
+                  th:text="${voyage.type}">
+            </span>
+            <span class="badge"
+                  th:classappend="
+                  ${voyage.saison?.name()=='HAUTE'}
+                  ? 'bg-warning text-dark' :
+                  (${voyage.saison?.name()=='BASSE'}
+                  ? 'bg-success' : 'bg-info')"
+                  th:text="${voyage.saison}">
+            </span>
+        </div>
+        <h1 th:text="${voyage.titre}"></h1>
+        <div class="dest">
+            <i class="fas fa-map-marker-alt me-2"></i>
+            <span th:if="${voyage.destination != null}"
+                  th:text="${voyage.destination.ville
+                  +', '+voyage.destination.pays}">
+            </span>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <a href="/client/voyages" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Retour aux voyages
+        </a>
+
+        <div class="row g-4">
+
+            <!-- INFOS GAUCHE -->
+            <div class="col-md-8">
+
+                <!-- DÉTAILS VOYAGE -->
+                <div class="info-card">
+                    <h5>
+                        <i class="fas fa-info-circle text-danger"></i>
+                        Détails du voyage
+                    </h5>
+
+                    <div class="info-row">
+                        <span class="lbl">
+                            📍 Destination
+                        </span>
+                        <span class="val"
+                              th:if="${voyage.destination != null}"
+                              th:text="${voyage.destination.ville
+                              +', '+voyage.destination.pays}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            🌍 Continent
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.destination?.continent} ?: '-'">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            🛫 Date de départ
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.dateDepart}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            🛬 Date de retour
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.dateRetour}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            🏷️ Type de voyage
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.type}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            🌤️ Saison
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.saison}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">
+                            💺 Places disponibles
+                        </span>
+                        <span class="val"
+                              th:text="${voyage.placesDisponibles}
+                              +' / '+${voyage.placesTotal}">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="info-card"
+                     th:if="${voyage.description != null
+                     and !voyage.description.isEmpty()}">
+                    <h5>
+                        <i class="fas fa-align-left text-danger"></i>
+                        Description
+                    </h5>
+                    <p class="text-muted"
+                       style="font-size:14px;
+                       line-height:1.7"
+                       th:text="${voyage.description}">
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- PRIX DROITE -->
+            <div class="col-md-4">
+                <div class="prix-card">
+                    <h5>
+                        <i class="fas fa-tag me-2"></i>
+                        Tarifs
+                    </h5>
+
+                    <div class="prix-item">
+                        <span>
+                            <i class="fas fa-user me-1"></i>
+                            Prix adulte
+                        </span>
+                        <span class="montant"
+                              th:text="${voyage.prixAdulte}+' Ar'">
+                        </span>
+                    </div>
+
+                    <div class="prix-item"
+                         th:if="${voyage.prixEnfant != null}">
+                        <span>
+                            <i class="fas fa-child me-1"></i>
+                            Prix enfant
+                        </span>
+                        <span class="montant"
+                              th:text="${voyage.prixEnfant}+' Ar'">
+                        </span>
+                    </div>
+
+                    <!-- Places dispo -->
+                    <div class="places-warning"
+                         th:if="${voyage.placesDisponibles <= 5}">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Plus que
+                        <strong th:text="${voyage.placesDisponibles}">
+                        </strong>
+                        place(s) disponible(s) !
+                    </div>
+
+                    <!-- BOUTON RÉSERVER -->
+                    <a th:if="${voyage.placesDisponibles > 0}"
+                       th:href="@{/client/reserver/{id}(id=${voyage.id})}"
+                       class="btn-reserver-large">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        Réserver maintenant
+                    </a>
+
+                    <!-- COMPLET -->
+                    <div th:unless="${voyage.placesDisponibles > 0}"
+                         style="background:rgba(220,53,69,0.2);
+                         border-radius:12px; padding:15px;
+                         text-align:center; margin-top:15px;
+                         color:#ff6b6b; font-weight:600">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Voyage complet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voyage non trouvé -->
+<div th:unless="${voyage}"
+     class="container py-5 text-center">
+    <h3>Voyage introuvable</h3>
+    <a href="/client/voyages"
+       class="btn btn-danger mt-3">
+        Retour aux voyages
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

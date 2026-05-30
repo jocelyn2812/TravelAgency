@@ -1,0 +1,1 @@
+web: java -jar target/TravelApp-1.0.0.jar

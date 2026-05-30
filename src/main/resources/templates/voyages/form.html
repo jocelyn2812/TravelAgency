@@ -126,7 +126,23 @@
                         </select>
                     </div>
                 </div>
-
+                <!-- Après le champ Saison -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">
+                        Statut
+                    </label>
+                    <div class="form-check form-switch mt-2">
+                        <input type="checkbox"
+                               th:field="*{actif}"
+                               class="form-check-input"
+                               id="actif"
+                               style="width:50px;height:25px"/>
+                        <label class="form-check-label ms-2 fw-semibold"
+                               for="actif">
+                            Voyage actif
+                        </label>
+                    </div>
+                </div>
                 <div class="section-header">
                     <i class="fas fa-calendar me-2 text-danger"></i>
                     Dates et places

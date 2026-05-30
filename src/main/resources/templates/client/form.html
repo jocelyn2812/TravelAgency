@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Formulaire Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; }
+        .sidebar { width: 260px; min-height: 100vh;
+            background: linear-gradient(180deg,
+                #1a1a2e, #16213e, #0f3460);
+            position: fixed; top: 0; left: 0; }
+        .brand { padding: 25px 20px;
+            border-bottom: 1px solid
+                rgba(255,255,255,0.1); }
+        .brand h4 { color: #e94560;
+            font-weight: 700; margin: 0; }
+        .brand small {
+            color: rgba(255,255,255,0.5); }
+        .section-title {
+            color: rgba(255,255,255,0.3);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 20px 5px; }
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 20px; border-radius: 8px;
+            margin: 2px 10px; display: block;
+            text-decoration: none; }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(233,69,96,0.2);
+            color: #e94560; }
+        .nav-link i { width: 22px;
+            margin-right: 8px; }
+        .nav-link.voyages-link i {
+            animation: fly 2s infinite; }
+        @keyframes fly {
+            0%, 100% { transform:
+                translateX(0) rotate(0deg); }
+            25% { transform:
+                translateX(3px) rotate(-10deg); }
+            75% { transform:
+                translateX(3px) rotate(10deg); }
+        }
+        .main { margin-left: 260px; }
+        .topbar { background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px
+                rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center; }
+        .box { background: white;
+            border-radius: 15px; padding: 30px;
+            box-shadow: 0 2px 15px
+                rgba(0,0,0,0.05); }
+        .section-header {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e94560;
+            font-weight: 600; }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px
+                rgba(233,69,96,0.1); }
+        .form-control.is-invalid {
+            border-color: #dc3545; }
+        .form-control.is-valid {
+            border-color: #28a745; }
+        .btn-red { background: #e94560;
+            border-color: #e94560; color: white; }
+        .btn-red:hover { background: #c73652;
+            color: white; }
+        .invalid-feedback {
+            font-size: 11px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="brand">
+        <h4><i class="fas fa-globe-africa me-2"></i>
+            Travel Agency</h4>
+        <small>Gestion d'agence de voyages</small>
+    </div>
+    <nav class="mt-2">
+        <div class="section-title">Principal</div>
+        <a th:href="@{/dashboard}" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            Tableau de bord
+        </a>
+        <div class="section-title">Gestion</div>
+        <a th:href="@{/clients}"
+           class="nav-link active">
+            <i class="fas fa-users"></i> Clients
+        </a>
+        <a th:href="@{/voyages}"
+           class="nav-link voyages-link">
+            <i class="fas fa-paper-plane"></i>
+            Voyages
+        </a>
+        <a th:href="@{/destinations}"
+           class="nav-link">
+            <i class="fas fa-map-marker-alt"></i>
+            Destinations
+        </a>
+        <a th:href="@{/reservations}"
+           class="nav-link">
+            <i class="fas fa-calendar-check"></i>
+            Réservations
+        </a>
+        <div class="section-title">Finance</div>
+        <a th:href="@{/paiements}"
+           class="nav-link">
+            <i class="fas fa-money-bill-wave"></i>
+            Paiements
+        </a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h5 class="fw-bold m-0">
+            <i class="fas fa-user-plus me-2
+                text-danger"></i>
+            <span th:text="${client.id != null}
+                ? 'Modifier le client'
+                : 'Nouveau client'">
+            </span>
+        </h5>
+        <a th:href="@{/logout}"
+           class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-1"></i>
+            Déconnexion
+        </a>
+    </div>
+
+    <div class="p-4">
+        <div class="box">
+            <form th:action="@{/clients/sauvegarder}"
+                  th:object="${client}"
+                  method="post"
+                  id="formClient"
+                  novalidate>
+                <input type="hidden"
+                       th:field="*{id}"/>
+
+                <!-- INFOS PERSONNELLES -->
+                <div class="section-header">
+                    <i class="fas fa-user me-2
+                        text-danger"></i>
+                    Informations personnelles
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Nom *
+                        </label>
+                        <input type="text"
+                               th:field="*{nom}"
+                               id="nom"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('nom')}
+                               ? ' is-invalid'"
+                               placeholder="Nom de famille"/>
+                        <div class="invalid-feedback"
+                             th:errors="*{nom}">
+                        </div>
+                        <div class="invalid-feedback"
+                             id="nomErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Prénom *
+                        </label>
+                        <input type="text"
+                               th:field="*{prenom}"
+                               id="prenom"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('prenom')}
+                               ? ' is-invalid'"
+                               placeholder="Prénom"/>
+                        <div class="invalid-feedback"
+                             th:errors="*{prenom}">
+                        </div>
+                        <div class="invalid-feedback"
+                             id="prenomErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Email
+                        </label>
+                        <input type="email"
+                               th:field="*{email}"
+                               id="email"
+                               class="form-control"
+                               placeholder="email@example.com"/>
+                        <div class="invalid-feedback"
+                             id="emailErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Téléphone
+                        </label>
+                        <input type="tel"
+                               th:field="*{telephone}"
+                               id="telephone"
+                               class="form-control"
+                               placeholder="+261 34 00 000 00"/>
+                        <div class="invalid-feedback"
+                             id="telErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Date de naissance
+                        </label>
+                        <input type="date"
+                               th:field="*{dateNaissance}"
+                               id="dateNaissance"
+                               class="form-control"/>
+                        <div class="invalid-feedback"
+                             id="dateNaissErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Nationalité
+                        </label>
+                        <input type="text"
+                               th:field="*{nationalite}"
+                               id="nationalite"
+                               class="form-control"
+                               placeholder="Ex: Malagasy"/>
+                        <div class="invalid-feedback"
+                             id="natErr"></div>
+                    </div>
+                </div>
+
+                <!-- ADRESSE -->
+                <div class="section-header">
+                    <i class="fas fa-map-marker-alt
+                        me-2 text-danger"></i>
+                    Adresse
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="form-label
+                            fw-semibold">
+                            Adresse
+                        </label>
+                        <input type="text"
+                               th:field="*{adresse}"
+                               class="form-control"
+                               placeholder="Rue, numéro..."/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Ville
+                        </label>
+                        <input type="text"
+                               th:field="*{ville}"
+                               id="ville"
+                               class="form-control"
+                               placeholder="Ex: Antananarivo"/>
+                        <div class="invalid-feedback"
+                             id="villeErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Pays
+                        </label>
+                        <input type="text"
+                               th:field="*{pays}"
+                               id="pays"
+                               class="form-control"
+                               placeholder="Ex: Madagascar"/>
+                        <div class="invalid-feedback"
+                             id="paysErr"></div>
+                    </div>
+                </div>
+
+                <!-- PASSEPORT -->
+                <div class="section-header">
+                    <i class="fas fa-passport me-2
+                        text-danger"></i>
+                    Passeport
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Numéro passeport
+                        </label>
+                        <input type="text"
+                               th:field="*{numeroPasseport}"
+                               id="passeport"
+                               class="form-control"
+                               placeholder="Ex: AB123456"
+                               style="text-transform:uppercase"/>
+                        <div class="invalid-feedback"
+                             id="passeportErr"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label
+                            fw-semibold">
+                            Date d'expiration
+                        </label>
+                        <input type="date"
+                               th:field="*{expirationPasseport}"
+                               id="expiration"
+                               class="form-control"/>
+                        <div class="invalid-feedback"
+                             id="expirationErr"></div>
+                    </div>
+                </div>
+
+                <!-- PRÉFÉRENCES -->
+                <div class="section-header">
+                    <i class="fas fa-star me-2
+                        text-danger"></i>
+                    Préférences
+                </div>
+                <div class="mb-4">
+                    <textarea th:field="*{preferences}"
+                              class="form-control"
+                              rows="3"
+                              maxlength="500"
+                              placeholder="Préférences de voyage...">
+                    </textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-red px-4"
+                            id="btnSubmit">
+                        <i class="fas fa-save me-2"></i>
+                        Sauvegarder
+                    </button>
+                    <a th:href="@{/clients}"
+                       class="btn btn-outline-secondary
+                       px-4">
+                        <i class="fas fa-arrow-left
+                            me-2"></i>
+                        Retour
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== RÈGLES =====
+const rLettre =
+    /^[a-zA-ZÀ-ÿ\s\-']{2,50}$/;
+const rLettreOpt =
+    /^[a-zA-ZÀ-ÿ\s\-']{0,100}$/;
+const rEmail =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const rTel =
+    /^[+]?[0-9\s]{8,15}$/;
+const rPasseport =
+    /^[A-Z0-9]{0,20}$/;
+
+// ===== BLOQUER CHIFFRES =====
+['nom','prenom','nationalite','ville','pays']
+    .forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('keypress', e => {
+            if (/[0-9]/.test(e.key)) {
+                e.preventDefault();
+                showErr(id + 'Err',
+                    'Chiffres non autorisés ici');
+                setTimeout(() =>
+                    hideErr(id + 'Err'), 2000);
+            }
+        });
+        el.addEventListener('blur', function() {
+            const v = this.value.trim();
+            if (!v) return;
+            const r = id === 'nom'
+                || id === 'prenom'
+                ? rLettre : rLettreOpt;
+            if (!r.test(v)) {
+                setInvalid(this, id + 'Err',
+                    'Lettres uniquement');
+            } else {
+                setValid(this, id + 'Err');
+            }
+        });
+    });
+
+// ===== BLOQUER LETTRES TÉLÉPHONE =====
+const tel = document.getElementById('telephone');
+if (tel) {
+    tel.addEventListener('keypress', e => {
+        if (!/[0-9+\s]/.test(e.key)) {
+            e.preventDefault();
+            showErr('telErr',
+                'Chiffres uniquement');
+            setTimeout(() =>
+                hideErr('telErr'), 2000);
+        }
+    });
+    tel.addEventListener('blur', function() {
+        const v = this.value.trim();
+        if (!v) return;
+        if (!rTel.test(v)) {
+            setInvalid(this, 'telErr',
+                'Format invalide (8-15 chiffres)');
+        } else {
+            setValid(this, 'telErr');
+        }
+    });
+}
+
+// ===== EMAIL =====
+const email = document.getElementById('email');
+if (email) {
+    email.addEventListener('blur', function() {
+        const v = this.value.trim();
+        if (!v) return;
+        if (!rEmail.test(v)) {
+            setInvalid(this, 'emailErr',
+                'Format email invalide');
+        } else {
+            setValid(this, 'emailErr');
+        }
+    });
+}
+
+// ===== DATE NAISSANCE =====
+const dateNaiss =
+    document.getElementById('dateNaissance');
+if (dateNaiss) {
+    dateNaiss.addEventListener('blur', function() {
+        const v = this.value;
+        if (!v) return;
+        const date = new Date(v);
+        const today = new Date();
+        if (date >= today) {
+            setInvalid(this, 'dateNaissErr',
+                'Doit être dans le passé');
+        } else {
+            setValid(this, 'dateNaissErr');
+        }
+    });
+}
+
+// ===== PASSEPORT =====
+const pp = document.getElementById('passeport');
+if (pp) {
+    pp.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+    pp.addEventListener('keypress', e => {
+        if (!/[A-Za-z0-9]/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+    pp.addEventListener('blur', function() {
+        const v = this.value.trim();
+        if (!v) return;
+        if (!rPasseport.test(v)) {
+            setInvalid(this, 'passeportErr',
+                'Lettres majuscules et chiffres');
+        } else {
+            setValid(this, 'passeportErr');
+        }
+    });
+}
+
+// ===== EXPIRATION PASSEPORT =====
+const exp = document.getElementById('expiration');
+if (exp) {
+    exp.addEventListener('blur', function() {
+        const v = this.value;
+        if (!v) return;
+        const date = new Date(v);
+        const today = new Date();
+        if (date <= today) {
+            setInvalid(this, 'expirationErr',
+                'Doit être dans le futur');
+        } else {
+            setValid(this, 'expirationErr');
+        }
+    });
+}
+
+// ===== VALIDATION FINALE =====
+document.getElementById('formClient')
+    .addEventListener('submit', function(e) {
+        let ok = true;
+
+        const nom = document.getElementById('nom');
+        if (!nom.value.trim()
+                || !rLettre.test(nom.value.trim())) {
+            setInvalid(nom, 'nomErr',
+                'Nom requis (lettres, 2-50 car.)');
+            ok = false;
+        }
+
+        const prenom =
+            document.getElementById('prenom');
+        if (!prenom.value.trim()
+                || !rLettre.test(
+                    prenom.value.trim())) {
+            setInvalid(prenom, 'prenomErr',
+                'Prénom requis (lettres, 2-50 car.)');
+            ok = false;
+        }
+
+        const em = document.getElementById('email');
+        if (em.value.trim()
+                && !rEmail.test(em.value.trim())) {
+            setInvalid(em, 'emailErr',
+                'Email invalide');
+            ok = false;
+        }
+
+        const t = document.getElementById(
+            'telephone');
+        if (t.value.trim()
+                && !rTel.test(t.value.trim())) {
+            setInvalid(t, 'telErr',
+                'Téléphone invalide');
+            ok = false;
+        }
+
+        if (!ok) e.preventDefault();
+    });
+
+// ===== UTILS =====
+function setInvalid(input, errId, msg) {
+    input.classList.add('is-invalid');
+    input.classList.remove('is-valid');
+    showErr(errId, msg);
+}
+
+function setValid(input, errId) {
+    input.classList.remove('is-invalid');
+    input.classList.add('is-valid');
+    hideErr(errId);
+}
+
+function showErr(id, msg) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+}
+
+function hideErr(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = '';
+        el.style.display = 'none';
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

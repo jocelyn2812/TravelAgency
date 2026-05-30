@@ -303,6 +303,19 @@
                                onclick="return confirm('Supprimer ce voyage ?')">
                                 <i class="fas fa-trash"></i>
                             </a>
+                            <!-- Activer / Désactiver -->
+                            <a th:if="${!v.actif}"
+                               th:href="@{/voyages/activer/{id}(id=${v.id})}"
+                               class="btn btn-sm btn-outline-success"
+                               title="Activer">
+                                <i class="fas fa-toggle-off"></i>
+                            </a>
+                            <a th:if="${v.actif}"
+                               th:href="@{/voyages/desactiver/{id}(id=${v.id})}"
+                               class="btn btn-sm btn-outline-warning"
+                               title="Désactiver">
+                                <i class="fas fa-toggle-on"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

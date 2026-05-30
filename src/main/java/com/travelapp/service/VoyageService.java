@@ -17,6 +17,17 @@ public class VoyageService {
         return voyageRepository.findAll();
     }
 
+    // ✅ Voyages actifs
+    public List<Voyage> findActifs() {
+        return voyageRepository.findByActifTrue();
+    }
+
+    // ✅ Voyages actifs avec places disponibles
+    public List<Voyage> findActifsAvecPlaces() {
+        return voyageRepository
+            .findByActifTrueAndPlacesDisponiblesGreaterThan(0);
+    }
+
     public Optional<Voyage> findById(Long id) {
         return voyageRepository.findById(id);
     }
@@ -33,7 +44,7 @@ public class VoyageService {
         return voyageRepository.count();
     }
 
-    public Object findActifs() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public long countActifs() {
+        return voyageRepository.countByActifTrue();
     }
 }

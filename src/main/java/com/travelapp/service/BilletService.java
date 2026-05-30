@@ -17,17 +17,18 @@ public class BilletService {
 
     private final ReservationService reservationService;
 
-    // Couleurs
     private static final Color ROUGE =
         new Color(233, 69, 96);
-    private static final Color BLEU_FONCE =
+    private static final Color BLEU =
         new Color(26, 26, 46);
-    private static final Color GRIS_CLAIR =
-        new Color(240, 242, 245);
+    private static final Color GRIS =
+        new Color(248, 249, 250);
     private static final Color BLANC =
-        new Color(255, 255, 255);
+        Color.WHITE;
     private static final Color VERT =
         new Color(40, 167, 69);
+    private static final Color TEXTE =
+        new Color(60, 60, 60);
 
     private static final DateTimeFormatter FMT =
         DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -38,465 +39,382 @@ public class BilletService {
         Reservation r = reservationService
             .findById(reservationId)
             .orElseThrow(() ->
-                new RuntimeException("Réservation introuvable"));
+                new RuntimeException(
+                    "Réservation introuvable"));
 
         ByteArrayOutputStream out =
             new ByteArrayOutputStream();
 
-        Document doc = new Document(PageSize.A4);
-        PdfWriter writer = PdfWriter.getInstance(doc, out);
+        // Format A5 paysage — compact comme un billet
+        Document doc = new Document(
+            new Rectangle(595, 350));
 
+        PdfWriter writer =
+            PdfWriter.getInstance(doc, out);
+        doc.setMargins(0, 0, 0, 0);
         doc.open();
 
-        // ===== HEADER =====
-        ajouterHeader(doc, writer, r);
+        PdfContentByte cb =
+            writer.getDirectContent();
 
-        // ===== INFOS CLIENT =====
-        ajouterSection(doc, "INFORMATIONS CLIENT",
-            ROUGE);
-        ajouterInfosClient(doc, r);
-
-        // ===== INFOS VOYAGE =====
-        ajouterSection(doc, "DÉTAILS DU VOYAGE",
-            BLEU_FONCE);
-        ajouterInfosVoyage(doc, r);
-
-        // ===== PARTICIPANTS =====
-        ajouterSection(doc, "PARTICIPANTS", ROUGE);
-        ajouterParticipants(doc, r);
-
-        // ===== PAIEMENT =====
-        ajouterSection(doc, "INFORMATIONS FINANCIÈRES",
-            BLEU_FONCE);
-        ajouterPaiement(doc, r);
-
-        // ===== FOOTER =====
-        ajouterFooter(doc, r);
-
-        doc.close();
-        return out.toByteArray();
-    }
-
-    private void ajouterHeader(Document doc,
-            PdfWriter writer, Reservation r)
-            throws Exception {
-
-        // Fond bleu foncé header
-        PdfContentByte cb = writer.getDirectContent();
-        cb.setColorFill(BLEU_FONCE);
-        cb.rectangle(36, 750, 523, 70);
+        // ===== FOND GLOBAL =====
+        cb.setColorFill(BLANC);
+        cb.rectangle(0, 0, 595, 350);
         cb.fill();
 
+        // ===== BANDE GAUCHE ROUGE =====
+        cb.setColorFill(ROUGE);
+        cb.rectangle(0, 0, 160, 350);
+        cb.fill();
+
+        // ===== BANDE BLEUE EN HAUT =====
+        cb.setColorFill(BLEU);
+        cb.rectangle(160, 310, 435, 40);
+        cb.fill();
+
+        // ===== LIGNE POINTILLÉE =====
+        cb.setColorStroke(new Color(200, 200, 200));
+        cb.setLineDash(4, 4);
+        cb.moveTo(160, 0);
+        cb.lineTo(160, 350);
+        cb.stroke();
+
+        // ===== CONTENU PARTIE GAUCHE =====
         // Titre agence
-        Font fontTitre = new Font(
-            Font.HELVETICA, 22,
-            Font.BOLD, BLANC);
-        Font fontSub = new Font(
-            Font.HELVETICA, 10,
-            Font.NORMAL,
-            new Color(200, 200, 200));
+        ColumnText ct = new ColumnText(cb);
+        ct.setSimpleColumn(10, 200, 150, 340);
 
-        PdfPTable header = new PdfPTable(2);
-        header.setWidthPercentage(100);
-        header.setWidths(new float[]{2f, 1f});
+        Font fAgence = new Font(
+            Font.HELVETICA, 14, Font.BOLD, BLANC);
+        Font fAgenceSub = new Font(
+            Font.HELVETICA, 8, Font.NORMAL,
+            new Color(255, 200, 200));
 
-        // Colonne gauche — Titre
-        PdfPCell cellLeft = new PdfPCell();
-        cellLeft.setBorder(Rectangle.NO_BORDER);
-        cellLeft.setBackgroundColor(BLEU_FONCE);
-        cellLeft.setPadding(12);
+        Paragraph agence =
+            new Paragraph("TRAVEL\nAGENCY", fAgence);
+        agence.setAlignment(Element.ALIGN_CENTER);
+        ct.addElement(agence);
 
-        Paragraph titre = new Paragraph(
-            "✈  TRAVEL AGENCY", fontTitre);
-        Paragraph sub = new Paragraph(
-            "Billet de voyage officiel", fontSub);
-        cellLeft.addElement(titre);
-        cellLeft.addElement(sub);
-        header.addCell(cellLeft);
+        Paragraph agenceSub =
+            new Paragraph("✈ Agence de voyages",
+                fAgenceSub);
+        agenceSub.setAlignment(Element.ALIGN_CENTER);
+        ct.addElement(agenceSub);
+        ct.go();
 
-        // Colonne droite — Numéro billet
-        PdfPCell cellRight = new PdfPCell();
-        cellRight.setBorder(Rectangle.NO_BORDER);
-        cellRight.setBackgroundColor(ROUGE);
-        cellRight.setPadding(12);
-        cellRight.setHorizontalAlignment(
-            Element.ALIGN_CENTER);
-        cellRight.setVerticalAlignment(
-            Element.ALIGN_MIDDLE);
-
-        Font fontNum = new Font(
-            Font.HELVETICA, 11, Font.BOLD, BLANC);
-        Font fontNumSub = new Font(
-            Font.HELVETICA, 9, Font.NORMAL, BLANC);
-
+        // Numéro billet
         String numBillet = String.format(
             "TRV-%d-%04d",
             java.time.LocalDate.now().getYear(),
             r.getId());
 
-        Paragraph num = new Paragraph(
-            "N° BILLET", fontNumSub);
-        num.setAlignment(Element.ALIGN_CENTER);
-        Paragraph numVal = new Paragraph(
-            numBillet, fontNum);
-        numVal.setAlignment(Element.ALIGN_CENTER);
+        ColumnText ctNum =
+            new ColumnText(cb);
+        ctNum.setSimpleColumn(10, 80, 150, 200);
 
-        cellRight.addElement(num);
-        cellRight.addElement(numVal);
-        header.addCell(cellRight);
+        Font fNum = new Font(
+            Font.HELVETICA, 9, Font.BOLD, BLANC);
+        Font fNumVal = new Font(
+            Font.HELVETICA, 11, Font.BOLD,
+            new Color(255, 220, 100));
 
-        doc.add(header);
-        doc.add(Chunk.NEWLINE);
-    }
+        Paragraph pNum =
+            new Paragraph("N° BILLET", fNum);
+        pNum.setAlignment(Element.ALIGN_CENTER);
+        ctNum.addElement(pNum);
 
-    private void ajouterSection(Document doc,
-            String titre, Color couleur)
-            throws Exception {
+        Paragraph pNumVal =
+            new Paragraph(numBillet, fNumVal);
+        pNumVal.setAlignment(Element.ALIGN_CENTER);
+        ctNum.addElement(pNumVal);
+        ctNum.go();
 
-        PdfPTable table = new PdfPTable(1);
-        table.setWidthPercentage(100);
-        table.setSpacingBefore(10);
-        table.setSpacingAfter(5);
+        // Date émission
+        ColumnText ctDate =
+            new ColumnText(cb);
+        ctDate.setSimpleColumn(10, 10, 150, 75);
 
-        PdfPCell cell = new PdfPCell();
-        cell.setBackgroundColor(couleur);
-        cell.setBorder(Rectangle.NO_BORDER);
-        cell.setPadding(8);
+        Font fDate = new Font(
+            Font.HELVETICA, 8, Font.NORMAL,
+            new Color(255, 200, 200));
+        Font fDateVal = new Font(
+            Font.HELVETICA, 9, Font.BOLD, BLANC);
 
-        Font font = new Font(
-            Font.HELVETICA, 11,
-            Font.BOLD, BLANC);
-        Paragraph p = new Paragraph(titre, font);
-        cell.addElement(p);
-        table.addCell(cell);
-        doc.add(table);
-    }
+        Paragraph pDate =
+            new Paragraph("Émis le", fDate);
+        pDate.setAlignment(Element.ALIGN_CENTER);
+        ctDate.addElement(pDate);
 
-    private void ajouterInfosClient(Document doc,
-            Reservation r) throws Exception {
+        Paragraph pDateVal = new Paragraph(
+            java.time.LocalDate.now().format(FMT),
+            fDateVal);
+        pDateVal.setAlignment(Element.ALIGN_CENTER);
+        ctDate.addElement(pDateVal);
+        ctDate.go();
 
-        PdfPTable table = new PdfPTable(2);
-        table.setWidthPercentage(100);
-        table.setSpacingAfter(5);
+        // ===== TITRE HEADER DROITE =====
+        ColumnText ctHeader =
+            new ColumnText(cb);
+        ctHeader.setSimpleColumn(170, 315, 590, 348);
+
+        Font fHeader = new Font(
+            Font.HELVETICA, 13, Font.BOLD, BLANC);
+        String titreVoyage = r.getVoyage() != null
+            && r.getVoyage().getTitre() != null
+            ? r.getVoyage().getTitre().toUpperCase()
+            : "VOYAGE";
+
+        Paragraph pHeader =
+            new Paragraph(titreVoyage, fHeader);
+        pHeader.setAlignment(Element.ALIGN_LEFT);
+        ctHeader.addElement(pHeader);
+        ctHeader.go();
+
+        // ===== CONTENU PRINCIPAL =====
+        // Colonne 1 — Client
+        ColumnText ctClient =
+            new ColumnText(cb);
+        ctClient.setSimpleColumn(170, 150, 340, 305);
+
+        Font fSection = new Font(
+            Font.HELVETICA, 8, Font.BOLD, ROUGE);
+        Font fLabel = new Font(
+            Font.HELVETICA, 8, Font.BOLD, BLEU);
+        Font fValue = new Font(
+            Font.HELVETICA, 9, Font.NORMAL, TEXTE);
+        Font fValueBold = new Font(
+            Font.HELVETICA, 10, Font.BOLD, BLEU);
+
+        Paragraph pClientSec =
+            new Paragraph("PASSAGER", fSection);
+        ctClient.addElement(pClientSec);
+        ctClient.addElement(new Paragraph(" "));
 
         if (r.getClient() != null) {
-            ajouterLigne(table,
-                "Nom complet",
-                r.getClient().getNom() + " "
-                + r.getClient().getPrenom());
-            ajouterLigne(table,
-                "Email",
-                r.getClient().getEmail() != null
-                ? r.getClient().getEmail() : "-");
-            ajouterLigne(table,
-                "Téléphone",
-                r.getClient().getTelephone() != null
-                ? r.getClient().getTelephone() : "-");
-            ajouterLigne(table,
-                "Nationalité",
-                r.getClient().getNationalite() != null
-                ? r.getClient().getNationalite() : "-");
-            ajouterLigne(table,
-                "N° Passeport",
-                r.getClient().getNumeroPasseport() != null
-                ? r.getClient().getNumeroPasseport() : "-");
-            ajouterLigne(table,
-                "Points fidélité",
-                r.getClient().getPointsFidelite()
-                + " points");
+            ctClient.addElement(new Paragraph(
+                r.getClient().getNom().toUpperCase()
+                + " "
+                + r.getClient().getPrenom()
+                    .toUpperCase(),
+                fValueBold));
+
+            if (r.getClient().getTelephone() != null) {
+                ctClient.addElement(new Paragraph(
+                    "📞 "
+                    + r.getClient().getTelephone(),
+                    fValue));
+            }
+
+            if (r.getClient().getNumeroPasseport()
+                    != null) {
+                ctClient.addElement(new Paragraph(
+                    "🪪 "
+                    + r.getClient()
+                        .getNumeroPasseport(),
+                    fValue));
+            }
+
+            if (r.getClient().getNationalite()
+                    != null) {
+                ctClient.addElement(new Paragraph(
+                    "🌍 "
+                    + r.getClient().getNationalite(),
+                    fValue));
+            }
         }
 
-        doc.add(table);
-    }
+        ctClient.addElement(new Paragraph(" "));
+        Paragraph pPartSec = new Paragraph(
+            "PARTICIPANTS", fSection);
+        ctClient.addElement(pPartSec);
 
-    private void ajouterInfosVoyage(Document doc,
-            Reservation r) throws Exception {
+        ctClient.addElement(new Paragraph(
+            "Adultes : "
+            + (r.getNombreAdultes() != null
+               ? r.getNombreAdultes() : 0),
+            fValue));
+        ctClient.addElement(new Paragraph(
+            "Enfants : "
+            + (r.getNombreEnfants() != null
+               ? r.getNombreEnfants() : 0),
+            fValue));
+        ctClient.go();
 
-        PdfPTable table = new PdfPTable(2);
-        table.setWidthPercentage(100);
-        table.setSpacingAfter(5);
+        // Colonne 2 — Voyage
+        ColumnText ctVoyage =
+            new ColumnText(cb);
+        ctVoyage.setSimpleColumn(340, 150, 510, 305);
+
+        Paragraph pVoyageSec =
+            new Paragraph("VOYAGE", fSection);
+        ctVoyage.addElement(pVoyageSec);
+        ctVoyage.addElement(new Paragraph(" "));
 
         if (r.getVoyage() != null) {
-            ajouterLigne(table,
-                "Titre du voyage",
-                r.getVoyage().getTitre() != null
-                ? r.getVoyage().getTitre() : "-");
-
-            if (r.getVoyage().getDestination() != null) {
-                ajouterLigne(table,
-                    "Destination",
-                    r.getVoyage().getDestination()
-                        .getVille() + ", "
-                    + r.getVoyage().getDestination()
-                        .getPays());
-                ajouterLigne(table,
-                    "Continent",
-                    r.getVoyage().getDestination()
-                        .getContinent() != null
-                    ? r.getVoyage().getDestination()
-                        .getContinent() : "-");
+            if (r.getVoyage().getDestination()
+                    != null) {
+                ctVoyage.addElement(
+                    new Paragraph(
+                        "📍 "
+                        + r.getVoyage()
+                            .getDestination()
+                            .getVille()
+                        + ", "
+                        + r.getVoyage()
+                            .getDestination()
+                            .getPays(),
+                        fValueBold));
             }
 
-            ajouterLigne(table,
-                "Type de voyage",
-                r.getVoyage().getType() != null
-                ? r.getVoyage().getType().name() : "-");
+            if (r.getVoyage().getDateDepart()
+                    != null) {
+                ctVoyage.addElement(
+                    new Paragraph(
+                        "🛫 Départ : "
+                        + r.getVoyage()
+                            .getDateDepart()
+                            .format(FMT),
+                        fValue));
+            }
 
-            ajouterLigne(table,
-                "Date de départ",
-                r.getVoyage().getDateDepart() != null
-                ? r.getVoyage().getDateDepart()
-                    .format(FMT) : "-");
+            if (r.getVoyage().getDateRetour()
+                    != null) {
+                ctVoyage.addElement(
+                    new Paragraph(
+                        "🛬 Retour : "
+                        + r.getVoyage()
+                            .getDateRetour()
+                            .format(FMT),
+                        fValue));
+            }
 
-            ajouterLigne(table,
-                "Date de retour",
-                r.getVoyage().getDateRetour() != null
-                ? r.getVoyage().getDateRetour()
-                    .format(FMT) : "-");
-
-            // Durée
             if (r.getVoyage().getDateDepart() != null
-                    && r.getVoyage().getDateRetour() != null) {
-                long duree = java.time.temporal.ChronoUnit
-                    .DAYS.between(
-                        r.getVoyage().getDateDepart(),
-                        r.getVoyage().getDateRetour());
-                ajouterLigne(table,
-                    "Durée", duree + " nuits");
+                    && r.getVoyage().getDateRetour()
+                       != null) {
+                long duree =
+                    java.time.temporal.ChronoUnit
+                        .DAYS.between(
+                            r.getVoyage()
+                                .getDateDepart(),
+                            r.getVoyage()
+                                .getDateRetour());
+                ctVoyage.addElement(
+                    new Paragraph(
+                        "🌙 Durée : "
+                        + duree + " nuits",
+                        fValue));
             }
 
-            ajouterLigne(table,
-                "Saison",
-                r.getVoyage().getSaison() != null
-                ? r.getVoyage().getSaison().name() : "-");
+            if (r.getVoyage().getType() != null) {
+                ctVoyage.addElement(
+                    new Paragraph(
+                        "🏷️ "
+                        + r.getVoyage()
+                            .getType().name(),
+                        fValue));
+            }
         }
+        ctVoyage.go();
 
-        doc.add(table);
-    }
+        // ===== BANDE BAS — PAIEMENT =====
+        cb.setColorFill(GRIS);
+        cb.rectangle(160, 0, 435, 145);
+        cb.fill();
 
-    private void ajouterParticipants(Document doc,
-            Reservation r) throws Exception {
+        cb.setColorFill(BLEU);
+        cb.rectangle(160, 0, 435, 30);
+        cb.fill();
 
-        PdfPTable table = new PdfPTable(2);
-        table.setWidthPercentage(100);
-        table.setSpacingAfter(5);
+        // Montants
+        ColumnText ctPay =
+            new ColumnText(cb);
+        ctPay.setSimpleColumn(170, 35, 510, 145);
 
-        ajouterLigne(table,
-            "Nombre d'adultes",
-            r.getNombreAdultes() != null
-            ? r.getNombreAdultes().toString() : "0");
+        Paragraph pPaySec =
+            new Paragraph("PAIEMENT", fSection);
+        ctPay.addElement(pPaySec);
+        ctPay.addElement(new Paragraph(" "));
 
-        ajouterLigne(table,
-            "Nombre d'enfants",
-            r.getNombreEnfants() != null
-            ? r.getNombreEnfants().toString() : "0");
+        // Tableau paiement compact
+        PdfPTable tPay = new PdfPTable(3);
+        tPay.setWidthPercentage(100);
+        tPay.setWidths(new float[]{1f, 1f, 1f});
 
-        int total = (r.getNombreAdultes() != null
-            ? r.getNombreAdultes() : 0)
-            + (r.getNombreEnfants() != null
-            ? r.getNombreEnfants() : 0);
+        Font fColHead = new Font(
+            Font.HELVETICA, 8, Font.BOLD, ROUGE);
+        Font fColVal = new Font(
+            Font.HELVETICA, 10, Font.BOLD, BLEU);
 
-        ajouterLigne(table,
-            "Total participants",
-            String.valueOf(total));
+        // En-têtes
+        PdfPCell h1 = cellPay(
+            "TOTAL", fColHead, BLANC);
+        PdfPCell h2 = cellPay(
+            "PAYÉ", fColHead, BLANC);
+        PdfPCell h3 = cellPay(
+            "RESTE", fColHead, BLANC);
+        tPay.addCell(h1);
+        tPay.addCell(h2);
+        tPay.addCell(h3);
 
-        if (r.getObservations() != null
-                && !r.getObservations().isEmpty()) {
-            ajouterLigne(table,
-                "Observations",
-                r.getObservations());
-        }
+        // Valeurs
+        String total = r.getMontantTotal() != null
+            ? r.getMontantTotal() + " Ar" : "0 Ar";
+        String paye = r.getAcompteVerse() != null
+            ? r.getAcompteVerse() + " Ar" : "0 Ar";
 
-        doc.add(table);
-    }
-
-    private void ajouterPaiement(Document doc,
-            Reservation r) throws Exception {
-
-        PdfPTable table = new PdfPTable(2);
-        table.setWidthPercentage(100);
-        table.setSpacingAfter(10);
-
-        ajouterLigne(table,
-            "Montant total",
-            r.getMontantTotal() != null
-            ? r.getMontantTotal() + " Ar" : "-");
-
-        ajouterLigne(table,
-            "Montant payé",
-            r.getAcompteVerse() != null
-            ? r.getAcompteVerse() + " Ar" : "0 Ar");
-
-        // Reste à payer
         java.math.BigDecimal reste =
             java.math.BigDecimal.ZERO;
         if (r.getMontantTotal() != null
                 && r.getAcompteVerse() != null) {
             reste = r.getMontantTotal()
                 .subtract(r.getAcompteVerse());
-        } else if (r.getMontantTotal() != null) {
-            reste = r.getMontantTotal();
         }
+        String resteStr = reste + " Ar";
 
-        ajouterLigne(table,
-            "Reste à payer",
-            reste + " Ar");
+        tPay.addCell(cellPay(total, fColVal, GRIS));
+        tPay.addCell(cellPay(paye, fColVal, GRIS));
+        tPay.addCell(cellPay(resteStr, fColVal, GRIS));
 
-        ajouterLigne(table,
-            "Statut réservation",
-            r.getStatut() != null
-            ? r.getStatut().name() : "-");
+        ctPay.addElement(tPay);
+        ctPay.go();
 
-        ajouterLigne(table,
-            "Date de réservation",
-            r.getDateReservation() != null
-            ? r.getDateReservation().format(FMT) : "-");
+        // Statut en bas
+        ColumnText ctStatut =
+            new ColumnText(cb);
+        ctStatut.setSimpleColumn(170, 5, 510, 30);
 
-        doc.add(table);
+        boolean confirme = r.getStatut() != null
+            && r.getStatut().name()
+               .equals("CONFIRMEE");
 
-        // STATUT VISUEL
-        PdfPTable statusTable = new PdfPTable(1);
-        statusTable.setWidthPercentage(100);
-        statusTable.setSpacingBefore(5);
-        statusTable.setSpacingAfter(10);
+        Font fStatut = new Font(
+            Font.HELVETICA, 10, Font.BOLD,
+            confirme ? VERT : new Color(255, 193, 7));
 
-        PdfPCell statusCell = new PdfPCell();
-        statusCell.setBorder(Rectangle.BOX);
-        statusCell.setBorderColor(
-            r.getStatut() != null
-            && r.getStatut().name().equals("CONFIRMEE")
-            ? VERT : ROUGE);
-        statusCell.setBorderWidth(2);
-        statusCell.setPadding(10);
-        statusCell.setHorizontalAlignment(
-            Element.ALIGN_CENTER);
-
-        Color statusColor =
-            r.getStatut() != null
-            && r.getStatut().name().equals("CONFIRMEE")
-            ? VERT : ROUGE;
-
-        Font statusFont = new Font(
-            Font.HELVETICA, 14,
-            Font.BOLD, statusColor);
-
-        String statusText =
-            r.getStatut() != null
-            && r.getStatut().name().equals("CONFIRMEE")
-            ? "✅  BILLET CONFIRMÉ — VOYAGE AUTORISÉ"
+        String statutText = confirme
+            ? "✅  BILLET CONFIRMÉ"
             : "⏳  EN ATTENTE DE CONFIRMATION";
 
-        Paragraph statusPara = new Paragraph(
-            statusText, statusFont);
-        statusPara.setAlignment(Element.ALIGN_CENTER);
-        statusCell.addElement(statusPara);
-        statusTable.addCell(statusCell);
-        doc.add(statusTable);
+        Paragraph pStatut =
+            new Paragraph(statutText, fStatut);
+        pStatut.setAlignment(Element.ALIGN_CENTER);
+        ctStatut.addElement(pStatut);
+        ctStatut.go();
+
+        doc.close();
+        return out.toByteArray();
     }
 
-    private void ajouterFooter(Document doc,
-            Reservation r) throws Exception {
-
-        // Ligne séparatrice
-        PdfPTable ligne = new PdfPTable(1);
-        ligne.setWidthPercentage(100);
-        ligne.setSpacingBefore(10);
-
-        PdfPCell cellLigne = new PdfPCell();
-        cellLigne.setBorder(Rectangle.TOP);
-        cellLigne.setBorderColor(ROUGE);
-        cellLigne.setBorderWidth(2);
-        cellLigne.setFixedHeight(2);
-        ligne.addCell(cellLigne);
-        doc.add(ligne);
-
-        // Footer texte
-        Font fontFooter = new Font(
-            Font.HELVETICA, 9,
-            Font.ITALIC,
-            new Color(100, 100, 100));
-
-        Font fontFooterBold = new Font(
-            Font.HELVETICA, 10,
-            Font.BOLD, BLEU_FONCE);
-
-        PdfPTable footer = new PdfPTable(3);
-        footer.setWidthPercentage(100);
-        footer.setSpacingBefore(8);
-
-        // Colonne 1 — Agence
-        PdfPCell c1 = new PdfPCell();
-        c1.setBorder(Rectangle.NO_BORDER);
-        c1.addElement(new Paragraph(
-            "Travel Agency", fontFooterBold));
-        c1.addElement(new Paragraph(
-            "Agence de voyages officielle",
-            fontFooter));
-        c1.addElement(new Paragraph(
-            "contact@travelagency.com",
-            fontFooter));
-        footer.addCell(c1);
-
-        // Colonne 2 — Conditions
-        PdfPCell c2 = new PdfPCell();
-        c2.setBorder(Rectangle.NO_BORDER);
-        c2.setHorizontalAlignment(Element.ALIGN_CENTER);
-        c2.addElement(new Paragraph(
-            "Ce billet est personnel et non cessible.",
-            fontFooter));
-        c2.addElement(new Paragraph(
-            "Présentez ce document à l'embarquement.",
-            fontFooter));
-        footer.addCell(c2);
-
-        // Colonne 3 — Date émission
-        PdfPCell c3 = new PdfPCell();
-        c3.setBorder(Rectangle.NO_BORDER);
-        c3.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        c3.addElement(new Paragraph(
-            "Émis le :", fontFooter));
-        c3.addElement(new Paragraph(
-            java.time.LocalDate.now().format(FMT),
-            fontFooterBold));
-
-        // Zone signature
-        c3.addElement(new Paragraph(
-            "\nSignature & Cachet :", fontFooter));
-        c3.addElement(new Paragraph(
-            "_____________________", fontFooter));
-        footer.addCell(c3);
-
-        doc.add(footer);
-    }
-
-    private void ajouterLigne(PdfPTable table,
-            String label, String valeur)
-            throws Exception {
-
-        Font fontLabel = new Font(
-            Font.HELVETICA, 10,
-            Font.BOLD, BLEU_FONCE);
-        Font fontValeur = new Font(
-            Font.HELVETICA, 10,
-            Font.NORMAL,
-            new Color(60, 60, 60));
-
-        // Cellule label
-        PdfPCell cellLabel = new PdfPCell(
-            new Phrase(label, fontLabel));
-        cellLabel.setBackgroundColor(GRIS_CLAIR);
-        cellLabel.setPadding(7);
-        cellLabel.setBorderColor(
+    private PdfPCell cellPay(String text,
+            Font font, Color bg) {
+        PdfPCell cell = new PdfPCell(
+            new Phrase(text, font));
+        cell.setBackgroundColor(bg);
+        cell.setHorizontalAlignment(
+            Element.ALIGN_CENTER);
+        cell.setPadding(6);
+        cell.setBorderColor(
             new Color(220, 220, 220));
-
-        // Cellule valeur
-        PdfPCell cellValeur = new PdfPCell(
-            new Phrase(valeur, fontValeur));
-        cellValeur.setPadding(7);
-        cellValeur.setBorderColor(
-            new Color(220, 220, 220));
-
-        table.addCell(cellLabel);
-        table.addCell(cellValeur);
+        return cell;
     }
 }

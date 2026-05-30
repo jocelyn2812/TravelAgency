@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width,
+          initial-scale=1.0"/>
+    <title>Mes Réservations — Travel Agency</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; }
+        .navbar-client {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .navbar-brand {
+            color: white; font-size: 20px;
+            font-weight: 800; text-decoration: none;
+        }
+        .navbar-brand span { color: #e94560; }
+        .nav-btn {
+            padding: 8px 18px; border-radius: 25px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .nav-btn-outline {
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+        .nav-btn-outline:hover {
+            border-color: #e94560; color: #e94560;
+        }
+        .nav-btn-solid {
+            background: #e94560; color: white;
+            border: none;
+        }
+        .nav-btn-solid:hover {
+            background: #c73652; color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            padding: 40px 20px; color: white;
+            text-align: center;
+        }
+        .page-header h2 {
+            font-weight: 800; margin: 0;
+        }
+        .page-header h2 span { color: #e94560; }
+        .res-card {
+            background: white; border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            border-left: 5px solid;
+            transition: transform 0.2s;
+        }
+        .res-card:hover {
+            transform: translateX(5px);
+        }
+        .res-card.en-attente {
+            border-color: #ffc107;
+        }
+        .res-card.confirmee {
+            border-color: #28a745;
+        }
+        .res-card.annulee {
+            border-color: #dc3545;
+        }
+        .res-card.terminee {
+            border-color: #6c757d;
+        }
+        .res-header {
+            display: flex; justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        .res-num {
+            font-size: 13px; color: #6c757d;
+            margin-bottom: 3px;
+        }
+        .res-titre {
+            font-size: 18px; font-weight: 700;
+            color: #1a1a2e;
+        }
+        .res-dest {
+            color: #e94560; font-size: 13px;
+            font-weight: 600;
+        }
+        .res-infos {
+            display: flex; flex-wrap: wrap; gap: 15px;
+            font-size: 13px; color: #6c757d;
+            margin-bottom: 15px;
+        }
+        .res-info-item {
+            display: flex; align-items: center;
+            gap: 5px;
+        }
+        .progress { height: 8px; border-radius: 4px; }
+        .res-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #f0f2f5;
+        }
+        .res-montant {
+            font-size: 20px; font-weight: 800;
+            color: #e94560;
+        }
+        .btn-billet {
+            background: linear-gradient(135deg,
+                #1a1a2e, #0f3460);
+            color: white; border: none;
+            border-radius: 20px;
+            padding: 8px 18px; font-size: 13px;
+            font-weight: 600; cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-billet:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            background: white; border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .alert-custom {
+            padding: 12px 15px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+        }
+        .alert-success {
+            background: rgba(40,167,69,0.08);
+            border: 1px solid rgba(40,167,69,0.2);
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar-client"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <a href="/client/accueil"
+       class="navbar-brand">
+        ✈ Travel<span>Agency</span>
+    </a>
+    <div style="display:flex;gap:8px;
+         align-items:center">
+
+        <a href="/client/voyages"
+           class="nav-btn nav-btn-outline">
+            <i class="fas fa-compass me-1"></i>
+            Voyages
+        </a>
+
+        <span sec:authorize="isAuthenticated()">
+            <a href="/client/mes-reservations"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-calendar-check me-1"></i>
+                Mes réservations
+            </a>
+            <a href="/client/profil"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-user me-1"></i>
+                Mon profil
+            </a>
+            <a href="/client/logout"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Déconnexion
+            </a>
+        </span>
+
+        <span sec:authorize="!isAuthenticated()">
+            <a href="/client/connexion"
+               class="nav-btn nav-btn-outline">
+                <i class="fas fa-sign-in-alt me-1"></i>
+                Connexion
+            </a>
+            <a href="/client/inscription"
+               class="nav-btn nav-btn-solid">
+                <i class="fas fa-user-plus me-1"></i>
+                S'inscrire
+            </a>
+        </span>
+    </div>
+</nav>
+<!-- HEADER -->
+<div class="page-header">
+    <h2>Mes <span>Réservations</span></h2>
+</div>
+
+<div class="container py-4">
+
+    <!-- Messages -->
+    <div th:if="${success}"
+         class="alert-custom alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+    </div>
+
+    <!-- LISTE -->
+    <div th:if="${not #lists.isEmpty(reservations)}">
+
+        <div th:each="r : ${reservations}">
+            <div class="res-card"
+                 th:classappend="
+                 ${r.statut?.name()=='CONFIRMEE'}
+                 ? 'confirmee' :
+                 (${r.statut?.name()=='ANNULEE'}
+                 ? 'annulee' :
+                 (${r.statut?.name()=='TERMINEE'}
+                 ? 'terminee' : 'en-attente'))">
+
+                <div class="res-header">
+                    <div>
+                        <div class="res-num">
+                            Réservation
+                            <strong th:text="'#'+${r.id}">
+                            </strong>
+                            — le
+                            <span th:text="${r.dateReservation}">
+                            </span>
+                        </div>
+                        <div class="res-titre"
+                             th:text="${r.voyage?.titre} ?: 'Voyage'">
+                        </div>
+                        <div class="res-dest"
+                             th:if="${r.voyage?.destination != null}">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span th:text="${r.voyage.destination.ville
+                            +', '+r.voyage.destination.pays}">
+                            </span>
+                        </div>
+                    </div>
+                    <span class="badge fs-6"
+                          th:classappend="
+                          ${r.statut?.name()=='CONFIRMEE'}
+                          ? 'bg-success' :
+                          (${r.statut?.name()=='ANNULEE'}
+                          ? 'bg-danger' :
+                          (${r.statut?.name()=='TERMINEE'}
+                          ? 'bg-secondary'
+                          : 'bg-warning text-dark'))"
+                          th:text="${r.statut}">
+                    </span>
+                </div>
+
+                <!-- INFOS -->
+                <div class="res-infos">
+                    <div class="res-info-item">
+                        <i class="fas fa-calendar text-danger"></i>
+                        <span th:text="${r.voyage?.dateDepart}">
+                        </span>
+                        →
+                        <span th:text="${r.voyage?.dateRetour}">
+                        </span>
+                    </div>
+                    <div class="res-info-item">
+                        <i class="fas fa-users text-danger"></i>
+                        <span th:text="${r.nombreAdultes}+' adulte(s)'">
+                        </span>
+                        <span th:if="${r.nombreEnfants > 0}"
+                              th:text="' + '+${r.nombreEnfants}+' enfant(s)'">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- BARRE PAIEMENT -->
+                <div th:if="${r.montantTotal != null
+                     and r.montantTotal > 0}">
+                    <div class="d-flex justify-content-between
+                                mb-1"
+                         style="font-size:12px;
+                         color:#6c757d">
+                        <span>Paiement</span>
+                        <span>
+                            <span th:text="${r.acompteVerse} ?: 0">
+                            </span> /
+                            <span th:text="${r.montantTotal}">
+                            </span> Ar
+                        </span>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success"
+                             th:style="'width:'+
+                             (${r.acompteVerse != null
+                             and r.montantTotal != null
+                             and r.montantTotal > 0}
+                             ? ${r.acompteVerse.doubleValue()
+                                / r.montantTotal.doubleValue()
+                                * 100}
+                             : 0)+'%'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="res-footer">
+                    <div>
+                        <div class="res-montant"
+                             th:text="${r.montantTotal} ?: '—'">
+                        </div>
+                        <small class="text-muted">
+                            Montant total
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <!-- Billet PDF si confirmée -->
+                        <a th:if="${r.statut?.name()=='CONFIRMEE'
+                               or r.statut?.name()=='TERMINEE'}"
+                           th:href="@{/reservations/billet/{id}(id=${r.id})}"
+                           target="_blank"
+                           class="btn-billet">
+                            <i class="fas fa-file-pdf me-1"></i>
+                            Télécharger billet
+                        </a>
+                        <!-- Statut en attente -->
+                        <span th:if="${r.statut?.name()=='EN_ATTENTE'}"
+                              style="font-size:13px;
+                              color:#ffc107;
+                              font-weight:600">
+                            <i class="fas fa-clock me-1"></i>
+                            En attente de confirmation
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state"
+         th:if="${#lists.isEmpty(reservations)}">
+        <span style="font-size:80px;display:block;
+              margin-bottom:15px">🗓️</span>
+        <h5 class="fw-bold">
+            Aucune réservation
+        </h5>
+        <p class="text-muted">
+            Vous n'avez pas encore effectué
+            de réservation
+        </p>
+        <a href="/client/voyages"
+           class="btn btn-danger mt-2">
+            <i class="fas fa-compass me-2"></i>
+            Découvrir les voyages
+        </a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
