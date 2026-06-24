@@ -1,1 +1,39 @@
-/target/
+# =========================
+# JAVA / SPRING BOOT
+# =========================
+target/
+*.class
+
+# Logs
+*.log
+
+# Package files
+*.jar
+*.war
+
+# =========================
+# IDE (IntelliJ / Eclipse / NetBeans)
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# =========================
+# VS CODE
+# =========================
+.vscode/
+
+# =========================
+# SPRING BOOT CONFIG (si sensible)
+# =========================
+.env
+
+# =========================
+# SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db
